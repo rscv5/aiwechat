@@ -2,10 +2,8 @@
 /* 容器样式 */
 .container {
   min-height: 100vh;
-  background: #F8F8F8;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 90rpx);
-  display: flex;
-  flex-direction: column;
+  background: #FFF9F0;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 120rpx);
 }
 
 /* 渐变背景 */
@@ -15,7 +13,7 @@
   left: 0;
   right: 0;
   height: 240rpx;
-  background: linear-gradient(135deg, #4A90E2 0%, #6AB5F3 100%);
+  background: linear-gradient(135deg, #FF9900 0%, #FFB84D 100%);
   z-index: 1;
 }
 
@@ -29,13 +27,23 @@
   flex-direction: column;
 }
 
+/* 卡片样式 */
+.card-section {
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.04);
+  margin-bottom: 32rpx;
+  padding: 32rpx;
+}
+
 /* 照片上传区域 */
-.photo-section {
-  background: #FFFFFF;
+.photo-section,
+.form-section {
+  background: #FFF9F0;
   border-radius: 16rpx;
-  padding: 16rpx;
-  margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  padding: 24rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(255, 153, 0, 0.06);
 }
 
 .section-title {
@@ -43,29 +51,32 @@
 }
 
 .section-title .title {
-  font-size: 28rpx;
-  font-weight: 500;
-  color: #333333;
+  color: #FF9900;
+  font-size: 32rpx;
+  font-weight: bold;
 }
 
-.section-title .subtitle {
-  font-size: 24rpx;
-  color: #999999;
-  margin-left: 16rpx;
+.section-title .subtitle,
+.add-photo text:last-child {
+  color: #FFB84D;
 }
 
+/* 图片上传区 */
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12rpx;
+  gap: 20rpx;
 }
 
-.photo-item {
-  position: relative;
-  aspect-ratio: 1;
-  background: #F5F5F5;
-  border-radius: 8rpx;
+.photo-item, .add-photo {
+  background: #FFF7E6;
+  border-radius: 20rpx;
   overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 180rpx;
 }
 
 .uploaded-photo {
@@ -76,11 +87,11 @@
 
 .delete-btn {
   position: absolute;
-  top: 6rpx;
-  right: 6rpx;
-  width: 32rpx;
-  height: 32rpx;
-  background: rgba(0, 0, 0, 0.5);
+  top: 12rpx;
+  right: 12rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0,0,0,0.12);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -105,61 +116,61 @@
 
 .add-icon {
   font-size: 36rpx;
-  color: #4A90E2;
+  color: #FF9900;
   line-height: 1;
 }
 
-.add-photo text:last-child {
-  font-size: 22rpx;
-  color: #999999;
-}
-
-/* 表单区域 */
-.form-section {
-  background: #FFFFFF;
+/* 输入框 */
+.input-field, .textarea {
+  background: #FFF7E6;
+  border: 2rpx solid #FFE0B2;
   border-radius: 16rpx;
-  padding: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-  flex: 1;
-}
-
-.form-item {
-  position: relative;
-  margin-bottom: 16rpx;
-}
-
-.textarea {
-  width: 100%;
-  min-height: 140rpx;
-  padding: 12rpx;
-  box-sizing: border-box;
-  border: 2rpx solid #EEEEEE;
-  border-radius: 8rpx;
-  font-size: 26rpx;
-  line-height: 1.5;
-}
-
-.word-count {
-  position: absolute;
-  bottom: 6rpx;
-  right: 12rpx;
-  font-size: 22rpx;
-  color: #999999;
-}
-
-.input-field {
-  padding: 12rpx;
-  margin-bottom: 12rpx;
-  border-bottom: 2rpx solid #EEEEEE;
-}
-
-.input-field.disabled {
-  color: #999999;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  height: 80rpx;
+  margin-bottom: 24rpx;
 }
 
 .input-field input {
-  width: 100%;
-  font-size: 26rpx;
+  background: transparent;
+  border: none;
+  font-size: 30rpx;
+  height: 100%;
+}
+
+.input-field.disabled {
+  color: #BFAE99;
+  background: #FDF6EC;
+}
+
+/* 按钮 */
+.submit-btn {
+  min-width: 200rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 32rpx;
+  border-radius: 36rpx;
+  background: #FF9900;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(255,153,0,0.08);
+}
+
+.submit-btn.disabled,
+.submit-btn[disabled] {
+  background: #E0E0E0;
+  color: #fff;
+}
+
+/* 其他细节优化 */
+.form-item {
+  margin-bottom: 24rpx;
+}
+
+.textarea {
+  min-height: 140rpx;
+  padding: 16rpx 24rpx;
+  resize: none;
 }
 
 .location-section {
@@ -170,65 +181,59 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
-  padding: 0 12rpx;
+  margin-bottom: 16rpx;
+  padding: 0 8rpx;
 }
 
 .location-header text {
-  font-size: 26rpx;
-  color: #333333;
+  font-size: 30rpx;
+  color: #333;
 }
 
 .location-btn {
-  font-size: 22rpx;
-  color: #4A90E2;
-  background: none;
+  font-size: 28rpx;
+  color: #FF9900;
+  background: #FFF7E6;
   border: none;
-  padding: 0;
-  line-height: 1;
+  border-radius: 32rpx;
+  padding: 0 36rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .location-btn::after {
   display: none;
 }
 
-/* 底部区域 */
-.footer {
+/* 底部提交栏 */
+.submit-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  background: #fff;
+  border-top: 1rpx solid #e6e6e6;
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  background: #FFFFFF;
-  padding: 12rpx 16rpx calc(12rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
-  z-index: 10;
+  width: 100vw;
+  box-sizing: border-box;
+  z-index: 100;
 }
 
-.tip {
-  font-size: 22rpx;
-  color: #999999;
-  margin-bottom: 8rpx;
-  display: block;
-}
-
-.submit-btn {
-  width: 100%;
-  height: 76rpx;
-  line-height: 76rpx;
-  background: #4A90E2;
-  color: #FFFFFF;
-  font-size: 32rpx;
-  font-weight: 500;
-  border-radius: 8rpx;
-  border: none;
-}
-
-.submit-btn.disabled {
-  background: #CCCCCC;
-}
-
-.submit-btn::after {
-  display: none;
+.submit-tip {
+  color: #888;
+  font-size: 28rpx;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  height: 80rpx;
 }
 
 /* Vant组件样式覆盖 */
@@ -237,6 +242,6 @@
 }
 
 .van-button--primary {
-  background: #4A90E2 !important;
-  border-color: #4A90E2 !important;
+  background: #e2da4a !important;
+  border-color: #e27a4a !important;
 }

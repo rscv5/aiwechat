@@ -18,22 +18,22 @@
 │
 ├── components/           // 公共组件目录
 │   └── common/          // 通用组件
-│       ├── community-header/   // 社区头部信息组件
+│       ├── community-header/   // 社区头部信息组件：展示社区名称、简介等，提升归属感，首页和工单页均可复用
 │       │   ├── index.js
 │       │   ├── index.json
 │       │   ├── index.wxml
 │       │   └── index.wxss
-│       ├── section-title/     // 板块标题组件
+│       ├── section-title/     // 板块标题组件：支持主标题和"更多"按钮，适用于各分区标题，结构清晰，风格统一
 │       │   ├── index.js
 │       │   ├── index.json
 │       │   ├── index.wxml
 │       │   └── index.wxss
-│       ├── activity-card-list/ // 活动卡片横滑组件
+│       ├── activity-card-list/ // 活动卡片横滑组件：横向滑动展示社区活动卡片，支持点击事件，首页常用
 │       │   ├── index.js
 │       │   ├── index.json
 │       │   ├── index.wxml
 │       │   └── index.wxss
-│       └── notice-card-list/   // 公示卡片横滑组件
+│       └── notice-card-list/   // 公示卡片横滑组件：横向滑动展示社区公示信息，支持点击事件，首页常用
 │           ├── index.js
 │           ├── index.json
 │           ├── index.wxml

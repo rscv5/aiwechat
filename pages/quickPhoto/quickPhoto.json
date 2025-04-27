@@ -1,6 +1,9 @@
 {
     "navigationBarTitleText": "随手拍工单",
-    "navigationBarBackgroundColor": "#4A90E2",
-    "navigationBarTextStyle": "white",
-    "usingComponents": {}
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTextStyle": "black",
+    "usingComponents": {
+        "section-title": "/components/common/section-title/index",
+        "community-header": "/components/common/community-header/index"
+    }
 }

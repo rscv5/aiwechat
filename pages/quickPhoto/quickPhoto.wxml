@@ -1,94 +1,95 @@
 <!--pages/quickPhoto/quickPhoto.wxml-->
-<view class="container">
-  <!-- 渐变背景 -->
-  <view class="gradient-bg"></view>
+<community-header communityInfo="{{communityInfo}}" />
+
+<!-- 渐变背景 -->
+<view class="gradient-bg"></view>
   
-  <!-- 主要内容区域 -->
-  <view class="content-wrapper">
-    <!-- 拍照上传区域 -->
-    <view class="photo-section">
-      <view class="section-title">
-        <text class="title">问题照片</text>
-        <text class="subtitle">请上传1-3张照片</text>
-      </view>
-      <view class="photo-grid">
-        <block wx:for="{{images}}" wx:key="index">
-          <view class="photo-item">
-            <image src="{{item}}" mode="aspectFill" class="uploaded-photo" bindtap="previewImage" data-index="{{index}}"/>
-            <view class="delete-btn" bindtap="removeImage" data-index="{{index}}">
-              <text class="delete-icon">×</text>
-            </view>
+<!-- 主要内容区域 -->
+<view class="content-wrapper">
+  <!-- 拍照上传区域 -->
+  <view class="photo-section">
+    <section-title title="问题照片" />
+    <view class="photo-grid">
+      <block wx:for="{{images}}" wx:key="index">
+        <view class="photo-item">
+          <image src="{{item}}" mode="aspectFill" class="uploaded-photo" bindtap="previewImage" data-index="{{index}}"/>
+          <view class="delete-btn" bindtap="removeImage" data-index="{{index}}">
+            <text class="delete-icon">×</text>
           </view>
-        </block>
-        <view class="photo-item add-photo" bindtap="takePhoto" wx:if="{{images.length < 3}}">
-          <text class="add-icon">+</text>
-          <text>拍照上传</text>
         </view>
+      </block>
+      <view class="photo-item add-photo" bindtap="takePhoto" wx:if="{{images.length < 3}}">
+        <text class="add-icon">+</text>
+        <text>拍照上传</text>
       </view>
     </view>
+  </view>
 
-    <!-- 问题描述区域 -->
-    <view class="form-section">
-      <view class="form-item">
-        <textarea 
-          class="textarea" 
-          placeholder="请简要描述问题（5-200字）" 
-          value="{{content}}" 
-          bindinput="onContentInput"
-          maxlength="200"
-        ></textarea>
-        <view class="word-count">{{content.length}}/200</view>
+  <!-- 问题描述区域 -->
+  <view class="form-section">
+    <section-title title="问题描述" />
+    <view class="form-item">
+      <textarea 
+        class="textarea" 
+        placeholder="请简要描述问题（5-200字）" 
+        value="{{content}}" 
+        bindinput="onContentInput"
+        maxlength="200"
+      ></textarea>
+      <view class="word-count">{{content.length}}/200</view>
+    </view>
+    
+    <!-- 地址信息 -->
+    <section-title title="问题位置" />
+    <view class="location-section">
+      <view class="location-header">
+        <text>问题位置</text>
+        <button 
+          class="location-btn" 
+          size="mini" 
+          loading="{{locationLoading}}"
+          bindtap="getLocation"
+        >刷新定位</button>
       </view>
-      
-      <!-- 地址信息 -->
-      <view class="location-section">
-        <view class="location-header">
-          <text>问题位置</text>
-          <button 
-            class="location-btn" 
-            size="mini" 
-            loading="{{locationLoading}}"
-            bindtap="getLocation"
-          >刷新定位</button>
-        </view>
-        <view class="input-field disabled">
-          <text>{{location || '正在获取位置...'}}</text>
-        </view>
-        <view class="input-field">
-          <input 
-            type="number" 
-            placeholder="请输入具体楼栋号" 
-            value="{{building}}" 
-            bindinput="onBuildingInput"
-            maxlength="10"
-          />
-        </view>
+      <view class="input-field disabled">
+        <text>{{location || '正在获取位置...'}}</text>
       </view>
-
-      <!-- 联系方式 -->
       <view class="input-field">
         <input 
           type="number" 
-          placeholder="请输入联系电话" 
-          value="{{phone}}" 
-          bindinput="onPhoneInput"
-          maxlength="11"
+          placeholder="请输入具体楼栋号" 
+          value="{{building}}" 
+          bindinput="onBuildingInput"
+          maxlength="10"
         />
       </view>
     </view>
-  </view>
 
-  <!-- 底部提交按钮 -->
-  <view class="footer">
-    <text class="tip">提交前请确保信息准确无误</text>
-    <button 
-      class="submit-btn {{!canSubmit ? 'disabled' : ''}}" 
-      loading="{{submitting}}"
-      disabled="{{!canSubmit}}"
-      bindtap="submit"
-    >提交工单</button>
+    <!-- 联系方式 -->
+    <section-title title="联系方式" />
+    <view class="input-field">
+      <input 
+        type="number" 
+        placeholder="请输入联系电话" 
+        value="{{phone}}" 
+        bindinput="onPhoneInput"
+        maxlength="11"
+      />
+    </view>
   </view>
-
-  <!-- Toast提示 -->
-  <van-toast id="van-toast" />
 </view>
+
+<!-- 底部提交按钮 -->
+<view class="submit-bar">
+  <view class="submit-tip">提交前请确保信息准确无误</view>
+  <button 
+    class="submit-btn {{!canSubmit ? 'disabled' : ''}}" 
+    loading="{{submitting}}"
+    disabled="{{!canSubmit}}"
+    bindtap="submit"
+    style="margin-left:auto;"
+  >提交</button>
+</view>
+
+<!-- Toast提示 -->
+<van-toast id="van-toast" />

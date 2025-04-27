@@ -173,10 +173,10 @@ Page({
                 throw new Error('获取位置信息失败');
             }
 
-            // 使用微信内置的逆地址解析
+            // 使用微信内置的逆地址解析，获取更详细的地址信息
             const addressRes = await new Promise((resolve, reject) => {
                 wx.request({
-                    url: `https://apis.map.qq.com/ws/geocoder/v1/?location=${locationRes.latitude},${locationRes.longitude}&key=${API.MAP_KEY}&get_poi=0`,
+                    url: `https://apis.map.qq.com/ws/geocoder/v1/?location=${locationRes.latitude},${locationRes.longitude}&key=${API.MAP_KEY}&get_poi=1`,
                     method: 'GET',
                     success: resolve,
                     fail: reject
@@ -187,8 +187,16 @@ Page({
                 throw new Error('获取地址信息失败');
             }
 
-            if (addressRes.data.status === 0 && addressRes.data.result && addressRes.data.result.address) {
-                const address = addressRes.data.result.address;
+            if (addressRes.data.status === 0 && addressRes.data.result) {
+                const result = addressRes.data.result;
+                let address = result.address;
+                
+                // 如果有周边POI信息，添加到地址中
+                if (result.pois && result.pois.length > 0) {
+                    const nearestPoi = result.pois[0];
+                    address = `${address}（${nearestPoi.title}）`;
+                }
+
                 this.setData({ 
                     location: address,
                     locationLoading: false

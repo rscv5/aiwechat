@@ -2,17 +2,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 24rpx 0 12rpx 0;
+  margin: 32rpx 0 20rpx 0;
 }
 .title {
-  color: var(--primary-color);
+  color: #FF9900;
   font-weight: bold;
   font-size: 32rpx;
 }
 .more {
   display: flex;
   align-items: center;
-  color: var(--primary-color);
+  color: #FF9900;
   font-size: 28rpx;
 }
 .arrow-icon {
