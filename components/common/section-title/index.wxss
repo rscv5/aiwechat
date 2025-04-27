@@ -1,0 +1,22 @@
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24rpx 0 12rpx 0;
+}
+.title {
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 32rpx;
+}
+.more {
+  display: flex;
+  align-items: center;
+  color: var(--primary-color);
+  font-size: 28rpx;
+}
+.arrow-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-left: 8rpx;
+} 

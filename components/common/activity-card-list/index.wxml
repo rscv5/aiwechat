@@ -1,0 +1,13 @@
+<!-- 横向滑动活动卡片列表 -->
+<scroll-view class="card-scroll" scroll-x>
+  <block wx:for="{{activities}}" wx:key="id">
+    <view class="activity-card" data-id="{{item.id}}" bindtap="onCardTap">
+      <image class="cover" src="{{item.cover}}" mode="aspectFill"/>
+      <view class="info">
+        <text class="title">{{item.title}}</text>
+        <text class="date">{{item.date}}</text>
+        <text class="location">{{item.location}}</text>
+      </view>
+    </view>
+  </block>
+</scroll-view> 

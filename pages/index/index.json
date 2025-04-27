@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "community-header": "/components/common/community-header/index",
+    "section-title": "/components/common/section-title/index",
+    "activity-card-list": "/components/common/activity-card-list/index",
+    "notice-card-list": "/components/common/notice-card-list/index"
+  }
+}

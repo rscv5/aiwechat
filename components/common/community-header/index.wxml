@@ -1,0 +1,6 @@
+<view class="community-header card">
+  <view class="community-name">{{communityInfo.name}}</view>
+  <view class="community-info">
+    <text class="text-secondary">{{communityInfo.description}}</text>
+  </view>
+</view> 

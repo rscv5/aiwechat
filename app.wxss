@@ -1,0 +1,55 @@
+/**app.wxss 全局样式文件 包括全局变量定义 通用样式**/
+page {
+  --primary-color: #FF9900;
+  --primary-bg: #FFF7E6;
+  --secondary-color: #FFB84D;
+  --text-title: #333333;
+  --text-body: #666666;
+  --border-color: #F0E6D2;
+  --shadow-color: rgba(255,153,0,0.08);
+
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: var(--text-body);
+  background: var(--primary-bg);
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 24rpx 0 0 0;
+  background: var(--primary-bg);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+} 
