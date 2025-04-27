@@ -56,10 +56,11 @@
         </view>
         <view class="input-field">
           <input 
-            type="text" 
+            type="number" 
             placeholder="请输入具体楼栋号" 
             value="{{building}}" 
             bindinput="onBuildingInput"
+            maxlength="10"
           />
         </view>
       </view>

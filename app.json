@@ -36,5 +36,8 @@
     "scope.userLocation": {
       "desc": "您的位置信息将用于随手拍工单的定位功能"
     }
-  }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ]
 }

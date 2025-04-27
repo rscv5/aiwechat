@@ -8,7 +8,8 @@ export const COMMUNITY = {
 // API相关常量
 export const API = {
   BASE_URL: 'https://api.example.com',
-  TIMEOUT: 5000
+  TIMEOUT: 5000,
+  MAP_KEY: '3JDBZ-UF5WT-CYFXS-LRPKS-22BLO-7AFBN' // 我的腾讯地图 key
 }
 
 // 本地存储键名

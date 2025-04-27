@@ -1,4 +1,6 @@
 // pages/quickPhoto/quickPhoto.js
+import { API } from '../../constants/index';
+
 Page({
 
     /**
@@ -80,11 +82,11 @@ Page({
                 await wx.authorize({ scope: 'scope.camera' });
             }
 
-            // 调用相机或相册
+            // 调用相机
             const res = await wx.chooseMedia({
                 count: 3 - this.data.images.length,
                 mediaType: ['image'],
-                sourceType: ['camera', 'album'],
+                sourceType: ['camera'],  // 只允许使用相机
                 camera: 'back',
                 sizeType: ['compressed']
             });
@@ -138,27 +140,55 @@ Page({
     async getLocation() {
         this.setData({ locationLoading: true });
         try {
+            // 先检查位置权限
             const auth = await wx.getSetting();
             if (!auth.authSetting['scope.userLocation']) {
-                await wx.authorize({ scope: 'scope.userLocation' });
+                try {
+                    await wx.authorize({ scope: 'scope.userLocation' });
+                } catch (authError) {
+                    wx.showModal({
+                        title: '需要位置权限',
+                        content: '请在设置中允许使用位置信息',
+                        confirmText: '去设置',
+                        success: (res) => {
+                            if (res.confirm) {
+                                wx.openSetting();
+                            }
+                        }
+                    });
+                    throw new Error('用户拒绝授权位置信息');
+                }
             }
 
-            const res = await wx.getLocation({
-                type: 'gcj02'
+            // 获取位置信息
+            const locationRes = await new Promise((resolve, reject) => {
+                wx.getLocation({
+                    type: 'gcj02',
+                    success: resolve,
+                    fail: reject
+                });
             });
 
-            // 使用腾讯地图逆地址解析
-            const locationRes = await wx.request({
-                url: 'https://apis.map.qq.com/ws/geocoder/v1/',
-                data: {
-                    location: `${res.latitude},${res.longitude}`,
-                    key: 'YOUR_MAP_KEY', // 需要替换为实际的腾讯地图Key
-                    get_poi: 0
-                }
+            if (!locationRes || !locationRes.latitude || !locationRes.longitude) {
+                throw new Error('获取位置信息失败');
+            }
+
+            // 使用微信内置的逆地址解析
+            const addressRes = await new Promise((resolve, reject) => {
+                wx.request({
+                    url: `https://apis.map.qq.com/ws/geocoder/v1/?location=${locationRes.latitude},${locationRes.longitude}&key=${API.MAP_KEY}&get_poi=0`,
+                    method: 'GET',
+                    success: resolve,
+                    fail: reject
+                });
             });
 
-            if (locationRes.data.status === 0) {
-                const address = locationRes.data.result.address;
+            if (!addressRes || !addressRes.data) {
+                throw new Error('获取地址信息失败');
+            }
+
+            if (addressRes.data.status === 0 && addressRes.data.result && addressRes.data.result.address) {
+                const address = addressRes.data.result.address;
                 this.setData({ 
                     location: address,
                     locationLoading: false
@@ -166,16 +196,18 @@ Page({
                     this.validateForm();
                 });
             } else {
-                throw new Error('获取地址失败');
+                throw new Error(addressRes.data.message || '获取地址失败');
             }
         } catch (error) {
+            console.error('Location error:', error);
             this.setData({ 
                 location: '',
                 locationLoading: false
             });
             wx.showToast({
-                title: '获取位置失败，请重试',
-                icon: 'none'
+                title: error.message || '获取位置失败，请重试',
+                icon: 'none',
+                duration: 2000
             });
         }
     },
@@ -190,8 +222,10 @@ Page({
     },
 
     onBuildingInput(e) {
+        // 只允许输入数字
+        const value = e.detail.value.replace(/[^\d]/g, '');
         this.setData({
-            building: e.detail.value
+            building: value
         }, () => {
             this.validateForm();
         });
