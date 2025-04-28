@@ -2,7 +2,8 @@
   "pages": [
     "pages/index/index",
     "pages/quickPhoto/quickPhoto",
-    "pages/workOrderList/workOrderList"
+    "pages/workOrderList/workOrderList",
+    "pages/workOrderDetail/workOrderDetail"
   ],
   "window": {
     "backgroundTextStyle": "light",

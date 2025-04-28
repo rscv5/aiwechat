@@ -74,8 +74,11 @@
 │   ├── workOrderList.wxml    // 页面结构，卡片列表、空状态、悬浮按钮
 │   └── workOrderList.wxss    // 页面样式，卡片、按钮、动画等
 │
-├── workOrderDetail/   // 工单详情页面（预留）
-│   ├── ...
+├── workOrderDetail/   // 工单详情页面
+│   ├── workOrderDetail.js      // 工单详情逻辑，图片浏览、脱敏、进度、返回
+│   ├── workOrderDetail.json    // 页面配置
+│   ├── workOrderDetail.wxml    // 页面结构，图片浏览、详情、进度、返回
+│   └── workOrderDetail.wxss    // 页面样式，卡片、图片、按钮等
 │
 ├── package.json         // 项目依赖配置
 └── project.config.json  // 项目配置文件

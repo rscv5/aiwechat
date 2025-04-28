@@ -1,5 +1,5 @@
 // pages/quickPhoto/quickPhoto.js
-import { API } from '../../constants/index';
+import { API, formatDate } from '../../constants/index';
 
 Page({
 
@@ -27,6 +27,7 @@ Page({
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
+    
     onReady() {
 
     },
@@ -253,7 +254,7 @@ Page({
         const isValid = 
             images.length > 0 && 
             images.length <= 3 &&
-            content.length >= 5 &&
+            content.length >= 0 &&
             content.length <= 200 &&
             location &&
             building &&
@@ -265,7 +266,6 @@ Page({
     // 提交工单
     async submit() {
         if (this.data.submitting) return;
-        
         this.setData({ submitting: true });
         wx.showLoading({
             title: '提交中...',
@@ -273,47 +273,46 @@ Page({
         });
 
         try {
-            // 上传图片
-            const uploadTasks = this.data.images.map(tempFilePath => 
-                wx.uploadFile({
-                    url: 'YOUR_UPLOAD_URL', // 需要替换为实际的上传接口
-                    filePath: tempFilePath,
-                    name: 'file',
-                    // header: { 'Authorization': `Bearer ${token}` }
-                })
-            );
+            // 本地开发：直接将工单数据保存到本地Storage，后续可切换为后端接口
+            // 1. 获取本地已有工单列表
+            let orders = wx.getStorageSync('workOrders') || [];
 
-            const uploadResults = await Promise.all(uploadTasks);
-            const imageUrls = uploadResults.map(res => JSON.parse(res.data).url);
-
-            // 提交工单数据
+            // 2. 构造新工单数据
             const orderData = {
-                images: imageUrls,
+                images: this.data.images, // 本地开发直接存图片路径，后端时可存imageUrls
                 content: this.data.content,
                 location: this.data.location,
                 building: this.data.building,
                 phone: this.data.phone,
-                createTime: new Date().toISOString()
+                createTime: formatDate(new Date()), // 使用标准格式
+                status: 'pending', // 默认待处理
+                id: Date.now() // 用时间戳做唯一ID
             };
 
-            await wx.request({
-                url: 'YOUR_API_URL/orders', // 需要替换为实际的接口地址
-                method: 'POST',
-                data: orderData,
-                // header: { 'Authorization': `Bearer ${token}` }
-            });
+            // 3. 添加到工单列表
+            orders.unshift(orderData);
 
+            // 4. 存回本地
+            wx.setStorageSync('workOrders', orders);
+
+            // 5. 提示成功并返回
             wx.hideLoading();
             wx.showToast({
                 title: '提交成功',
                 icon: 'success'
             });
-            
-            // 延迟返回上一页
             setTimeout(() => {
                 wx.navigateBack();
             }, 1500);
 
+            // ====== 后端接口上线后可替换为如下伪代码 =====
+            // 1. 上传图片（如有）
+            // 2. 调用后端API提交工单
+            // await request({
+            //   url: '/orders',
+            //   method: 'POST',
+            //   data: orderData
+            // });
         } catch (error) {
             console.error('Submit error:', error);
             wx.hideLoading();

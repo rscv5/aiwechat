@@ -1,0 +1,52 @@
+<view class="detail-container">
+  <!-- 图片浏览区 -->
+  <scroll-view class="image-scroll" scroll-x>
+    <block wx:for="{{order.images}}" wx:key="index">
+      <image
+        class="order-image"
+        src="{{item}}"
+        mode="aspectFill"
+        bindtap="previewImage"
+        data-index="{{index}}"
+      />
+    </block>
+  </scroll-view>
+
+  <!-- 工单信息 -->
+  <view class="info-card">
+    <view class="info-row">
+      <text class="info-label">楼栋</text>
+      <text class="info-value">{{order.building}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">提交时间</text>
+      <text class="info-value">{{order.createTime}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">联系电话</text>
+      <text class="info-value">{{maskedPhone}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">问题描述</text>
+      <text class="info-value">{{order.content}}</text>
+    </view>
+    <view class="info-row">
+      <text class="info-label">定位</text>
+      <text class="info-value">{{order.location}}</text>
+    </view>
+  </view>
+
+  <!-- 处理进度 -->
+  <view class="progress-card">
+    <text class="progress-title">处理进度</text>
+    <view class="progress-step {{order.status}}">
+      <block wx:if="{{order.status === 'pending'}}">待处理</block>
+      <block wx:elif="{{order.status === 'processing'}}">处理中</block>
+      <block wx:elif="{{order.status === 'done'}}">已完成</block>
+      <block wx:else>未知</block>
+    </view>
+  </view>
+
+  <!-- 返回按钮 -->
+  <button class="back-btn" bindtap="goBack">返回</button>
+</view> 

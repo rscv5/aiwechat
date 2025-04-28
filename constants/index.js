@@ -42,4 +42,11 @@ export const ASSETS = {
     BANNER2: '/assets/images/banner2.png',
     BANNER3: '/assets/images/banner3.png'
   }
+}
+
+// 时间格式化函数
+export function formatDate(date) {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const pad = n => n < 10 ? '0' + n : n;
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 } 

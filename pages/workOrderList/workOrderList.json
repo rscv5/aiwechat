@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "我的工单",
   "usingComponents": {
-    "status-tab": "/components/common/status-tab/index"
+    "status-tab": "/components/common/status-tab/index",
+    "empty-state": "/components/common/empty-state/index"
   }
 } 

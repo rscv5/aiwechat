@@ -22,10 +22,13 @@
       </block>
     </block>
     <block wx:else>
-      <view class="empty-state">
-        <image src="/assets/icons/empty.png" class="empty-img"/>
-        <text class="empty-tip">您暂时没有上报工单，快去反馈吧！</text>
-      </view>
+      <empty-state
+        title="{{emptyTitle}}"
+        subtitle="{{emptySubtitle}}"
+        showBtn="{{activeStatus === 'all'}}"
+        btnText="去反馈"
+        bind:action="goToQuickPhoto"
+      />
     </block>
   </scroll-view>
 
