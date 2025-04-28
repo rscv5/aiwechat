@@ -3,72 +3,75 @@ page {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #FFF9F0;
+  background: #F8F9FA;
 }
+
 .scrollarea {
   flex: 1;
   overflow-y: hidden;
 }
 
+.container {
+  padding: 24rpx;
+}
+
+/* 社区头部样式 */
 .community-header {
-  background: #fff;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.04);
+  background: #FFFFFF;
+  border-radius: 16rpx;
   padding: 32rpx;
   margin-bottom: 32rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 }
 
 .community-name {
   font-size: 36rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 12rpx;
 }
 
 .community-info {
   font-size: 28rpx;
-  color: #FFB84D;
+  color: #666666;
+  margin-bottom: 8rpx;
 }
 
-.swiper-container {
-  margin: 20rpx 0;
-  height: 300rpx;
-  overflow: hidden;
+.community-desc {
+  font-size: 26rpx;
+  color: #999999;
 }
 
-.banner-image {
-  width: 100%;
-  height: 100%;
+/* 区块样式 */
+.section {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 }
 
-.quick-entry {
-  margin-top: 20rpx;
-}
-
-.grid-container {
+.section-header {
   display: flex;
-  justify-content: space-around;
-  padding: 20rpx 0;
-}
-
-.grid-item {
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  width: 200rpx;
+  margin-bottom: 24rpx;
 }
 
-.grid-icon {
-  width: 80rpx;
-  height: 80rpx;
-  margin-bottom: 16rpx;
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
 }
 
-.grid-text {
-  font-size: 28rpx;
-  color: var(--text-color);
+.section-more {
+  font-size: 32rpx;
+  color: #999999;
+  font-weight: 300;
+  padding: 0 8rpx;
 }
 
+/* 卡片滚动区域 */
 .card-scroll {
   display: flex;
   flex-direction: row;
@@ -76,40 +79,61 @@ page {
   white-space: nowrap;
   padding-bottom: 8rpx;
 }
-.activity-card, .notice-card {
+
+/* 卡片通用样式 */
+.party-card, .activity-card, .notice-card {
   display: inline-block;
-  width: 320rpx;
-  background: #fff;
-  border-radius: 24rpx;
+  width: 280rpx;
+  background: #FFFFFF;
+  border-radius: 12rpx;
   margin-right: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.04);
   overflow: hidden;
-  padding: 0;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
+
+/* 党建卡片特殊样式 */
+.party-card {
+  border-top: 4rpx solid #E74C3C;
+}
+
 .cover {
   width: 100%;
   height: 160rpx;
-  border-top-left-radius: 24rpx;
-  border-top-right-radius: 24rpx;
+  background: #F5F5F5;
 }
+
 .info {
-  padding: 24rpx;
+  padding: 20rpx;
 }
+
 .title {
-  font-size: 30rpx;
-  color: #333;
-  font-weight: bold;
-  margin-bottom: 8rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 12rpx;
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+.meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
 .date, .location {
   font-size: 24rpx;
-  color: #FF9900;
-  margin-right: 8rpx;
+  color: #999999;
+  margin-right: 12rpx;
 }
+
 .desc {
   font-size: 24rpx;
-  color: #666;
-  margin-top: 8rpx;
+  color: #666666;
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

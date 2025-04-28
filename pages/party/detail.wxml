@@ -1,0 +1,32 @@
+<!--pages/party/detail.wxml-->
+<view class="container">
+  <!-- 顶部轮播图 -->
+  <swiper class="banner" indicator-dots="{{true}}" autoplay="{{true}}" interval="{{3000}}" duration="{{500}}">
+    <swiper-item wx:for="{{activity.images}}" wx:key="index">
+      <image class="banner-image" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"/>
+    </swiper-item>
+  </swiper>
+
+  <!-- 活动信息 -->
+  <view class="content">
+    <view class="title">{{activity.title}}</view>
+    <view class="meta">
+      <view class="meta-item">
+        <text class="label">活动时间</text>
+        <text class="value">{{activity.date}}</text>
+      </view>
+      <view class="meta-item">
+        <text class="label">活动地点</text>
+        <text class="value">{{activity.location}}</text>
+      </view>
+    </view>
+
+    <!-- 活动详情 -->
+    <view class="section">
+      <view class="section-title">活动详情</view>
+      <view class="section-content">
+        <rich-text nodes="{{activity.content}}"></rich-text>
+      </view>
+    </view>
+  </view>
+</view> 

@@ -3,14 +3,69 @@
 <scroll-view class="scrollarea" scroll-y type="list">
   <view class="container">
     <!-- 社区基本信息 -->
-    <community-header communityInfo="{{communityInfo}}" />
+    <view class="community-header">
+      <view class="community-name">{{communityInfo.name}}</view>
+      <view class="community-desc">{{communityInfo.description}}</view>
+    </view>
+
+    <!-- 社区党建 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">社区党建</text>
+        <text class="section-more" bindtap="onMoreParty">></text>
+      </view>
+      <scroll-view class="card-scroll" scroll-x>
+        <view class="party-card" wx:for="{{partyActivities}}" wx:key="id" bindtap="onPartyTap" data-id="{{item.id}}">
+          <image class="cover" src="{{item.cover}}" mode="aspectFill"/>
+          <view class="info">
+            <text class="title">{{item.title}}</text>
+            <view class="meta">
+              <text class="date">{{item.date}}</text>
+              <text class="location">{{item.location}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
 
     <!-- 社区活动 -->
-    <section-title title="社区活动" moreText="全部活动" bind:moreTap="onMoreActivity"/>
-    <activity-card-list activities="{{activities}}" bind:cardTap="onActivityTap"/>
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">社区活动</text>
+        <text class="section-more" bindtap="onMoreActivity">></text>
+      </view>
+      <scroll-view class="card-scroll" scroll-x>
+        <view class="activity-card" wx:for="{{activities}}" wx:key="id" bindtap="onActivityTap" data-id="{{item.id}}">
+          <image class="cover" src="{{item.cover}}" mode="aspectFill"/>
+          <view class="info">
+            <text class="title">{{item.title}}</text>
+            <view class="meta">
+              <text class="date">{{item.date}}</text>
+              <text class="location">{{item.location}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
 
     <!-- 社区公示 -->
-    <section-title title="社区公示" moreText="全部公示" bind:moreTap="onMoreNotice"/>
-    <notice-card-list notices="{{notices}}" bind:cardTap="onNoticeTap"/>
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">社区公示</text>
+        <text class="section-more" bindtap="onMoreNotice">></text>
+      </view>
+      <scroll-view class="card-scroll" scroll-x>
+        <view class="notice-card" wx:for="{{notices}}" wx:key="id" bindtap="onNoticeTap" data-id="{{item.id}}">
+          <image class="cover" src="{{item.cover}}" mode="aspectFill"/>
+          <view class="info">
+            <text class="title">{{item.title}}</text>
+            <view class="meta">
+              <text class="date">{{item.date}}</text>
+            </view>
+            <text class="desc">{{item.desc}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
   </view>
 </scroll-view>

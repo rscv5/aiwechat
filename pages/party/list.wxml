@@ -1,0 +1,37 @@
+<!--pages/party/list.wxml-->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input">
+      <image class="search-icon" src="/assets/icons/search.png" mode="aspectFit"/>
+      <input type="text" placeholder="搜索党建活动" placeholder-class="placeholder" bindinput="onSearch"/>
+    </view>
+  </view>
+
+  <!-- 活动列表 -->
+  <scroll-view class="activity-list" scroll-y enable-back-to-top refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onRefresh" bindscrolltolower="onLoadMore">
+    <view class="activity-item" wx:for="{{activityList}}" wx:key="id" bindtap="onActivityTap" data-id="{{item.id}}">
+      <view class="activity-cover-wrapper">
+        <image class="activity-cover" src="{{item.cover}}" mode="aspectFill"/>
+      </view>
+      <view class="activity-info">
+        <view class="activity-title">{{item.title}}</view>
+        <view class="activity-meta">
+          <view class="meta-item">
+            <image class="meta-icon" src="/assets/icons/date.png" mode="aspectFit"/>
+            <text class="meta-text">{{item.date}}</text>
+          </view>
+          <view class="meta-item">
+            <image class="meta-icon" src="/assets/icons/location.png" mode="aspectFit"/>
+            <text class="meta-text">{{item.location}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="loading" wx:if="{{isLoading}}">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+    <view class="no-more" wx:if="{{!hasMore}}">没有更多内容了</view>
+  </scroll-view>
+</view> 

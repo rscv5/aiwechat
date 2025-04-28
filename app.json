@@ -3,7 +3,10 @@
     "pages/index/index",
     "pages/quickPhoto/quickPhoto",
     "pages/workOrderList/workOrderList",
-    "pages/workOrderDetail/workOrderDetail"
+    "pages/workOrderDetail/workOrderDetail",
+    "pages/party/detail",
+    "pages/party/index",
+    "pages/party/list"
   ],
   "window": {
     "backgroundTextStyle": "light",
