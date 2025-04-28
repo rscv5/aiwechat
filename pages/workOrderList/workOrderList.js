@@ -1,4 +1,4 @@
-import { formatDate } from '../../constants/index';
+const { formatDate } = require('../../constants/index');
 
 Page({
   data: {
@@ -24,7 +24,10 @@ Page({
   },
 
   onStatusChange(e) {
-    this.setData({ activeStatus: e.detail }, this.fetchWorkOrders);
+    const activeStatus = e.detail;
+    this.setData({ activeStatus }, () => {
+      this.fetchWorkOrders();
+    });
   },
 
   fetchWorkOrders() {
@@ -39,7 +42,9 @@ Page({
       ...order,
       createTime: formatDate(order.createTime)
     }));
-    this.setData({ workOrders: filtered }, this.updateEmptyState);
+    this.setData({ workOrders: filtered }, () => {
+      this.updateEmptyState();
+    });
   },
 
   // 智能空状态提示

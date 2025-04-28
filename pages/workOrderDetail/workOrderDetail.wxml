@@ -1,6 +1,6 @@
 <view class="detail-container">
   <!-- 图片浏览区 -->
-  <scroll-view class="image-scroll" scroll-x>
+  <scroll-view class="image-scroll" scroll-x enable-flex>
     <block wx:for="{{order.images}}" wx:key="index">
       <image
         class="order-image"

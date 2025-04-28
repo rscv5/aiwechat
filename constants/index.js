@@ -1,26 +1,26 @@
 // 社区相关常量
-export const COMMUNITY = {
+const COMMUNITY = {
   NAME: '明发社区',
   ADDRESS: '示例地址',
   DESCRIPTION: '智慧社区示范点'
 }
 
 // API相关常量
-export const API = {
+const API = {
   BASE_URL: 'https://api.example.com',
   TIMEOUT: 5000,
   MAP_KEY: '3JDBZ-UF5WT-CYFXS-LRPKS-22BLO-7AFBN' // 我的腾讯地图 key
 }
 
 // 本地存储键名
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   USER_INFO: 'userInfo',
   TOKEN: 'token',
   COMMUNITY_INFO: 'communityInfo'
 }
 
 // 页面路径
-export const ROUTES = {
+const ROUTES = {
   INDEX: '/pages/index/index',
   QUICK_PHOTO: '/pages/quickPhoto/quickPhoto',
   ACTIVITY: '/pages/activity/activity',
@@ -28,7 +28,7 @@ export const ROUTES = {
 }
 
 // 图片资源路径
-export const ASSETS = {
+const ASSETS = {
   ICONS: {
     HOME: '/assets/icons/home.png',
     HOME_ACTIVE: '/assets/icons/home-active.png',
@@ -45,8 +45,27 @@ export const ASSETS = {
 }
 
 // 时间格式化函数
-export function formatDate(date) {
-  const d = typeof date === 'string' ? new Date(date) : date;
+function formatDate(date) {
+  if (!date) return '';
+  
+  // 处理字符串日期
+  if (typeof date === 'string') {
+    // 将日期字符串转换为 iOS 兼容的格式
+    date = date.replace(/-/g, '/');
+  }
+  
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  
   const pad = n => n < 10 ? '0' + n : n;
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+module.exports = {
+  COMMUNITY,
+  API,
+  STORAGE_KEYS,
+  ROUTES,
+  ASSETS,
+  formatDate
 } 
