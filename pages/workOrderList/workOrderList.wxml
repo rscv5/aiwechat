@@ -1,0 +1,34 @@
+<view class="workorder-list-container">
+  <!-- 状态筛选Tab -->
+  <status-tab
+    tabs="{{statusTabs}}"
+    active="{{activeStatus}}"
+    bind:change="onStatusChange"
+  />
+
+  <!-- 工单列表 -->
+  <scroll-view class="order-scroll" scroll-y>
+    <block wx:if="{{workOrders.length}}">
+      <block wx:for="{{workOrders}}" wx:key="id">
+        <view class="order-card" bindtap="goToDetail" data-id="{{item.id}}">
+          <view class="order-info">
+            <text class="order-building">楼栋：{{item.building}}</text>
+            <text class="order-time">{{item.createTime}}</text>
+          </view>
+          <view class="order-status {{item.status}}">
+            {{statusMap[item.status]}}
+          </view>
+        </view>
+      </block>
+    </block>
+    <block wx:else>
+      <view class="empty-state">
+        <image src="/assets/icons/empty.png" class="empty-img"/>
+        <text class="empty-tip">您暂时没有上报工单，快去反馈吧！</text>
+      </view>
+    </block>
+  </scroll-view>
+
+  <!-- 悬浮按钮 -->
+  <button class="fab-btn" bindtap="goToQuickPhoto">+ 反馈信息</button>
+</view> 

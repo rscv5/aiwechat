@@ -1,0 +1,13 @@
+<scroll-view class="status-tab-scroll" scroll-x>
+  <view class="status-tab-list">
+    <block wx:for="{{tabs}}" wx:key="value">
+      <view
+        class="status-tab-item {{active === item.value ? 'active' : ''}}"
+        bindtap="onTabTap"
+        data-value="{{item.value}}"
+      >
+        {{item.label}}
+      </view>
+    </block>
+  </view>
+</scroll-view> 

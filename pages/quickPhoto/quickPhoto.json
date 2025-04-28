@@ -2,6 +2,7 @@
     "navigationBarTitleText": "随手拍工单",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTextStyle": "black",
+    "disableScroll": true,
     "usingComponents": {
         "section-title": "/components/common/section-title/index",
         "community-header": "/components/common/community-header/index"

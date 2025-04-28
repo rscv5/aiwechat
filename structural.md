@@ -18,12 +18,14 @@
 │
 ├── components/           // 公共组件目录
 │   └── common/          // 通用组件
-│       ├── community-header/   // 社区头部信息组件：展示社区名称、简介等，提升归属感，首页和工单页均可复用
+│       ├── community-header/   // 社区头部信息组件：展示社区名称、简介等，提升归属感，
+                                 首页和工单页均可复用
 │       │   ├── index.js
 │       │   ├── index.json
 │       │   ├── index.wxml
 │       │   └── index.wxss
-│       ├── section-title/     // 板块标题组件：支持主标题和"更多"按钮，适用于各分区标题，结构清晰，风格统一
+│       ├── section-title/     // 板块标题组件：支持主标题和"更多"按钮，适用于各分区标题，
+                                    结构清晰，风格统一
 │       │   ├── index.js
 │       │   ├── index.json
 │       │   ├── index.wxml
@@ -33,11 +35,17 @@
 │       │   ├── index.json
 │       │   ├── index.wxml
 │       │   └── index.wxss
-│       └── notice-card-list/   // 公示卡片横滑组件：横向滑动展示社区公示信息，支持点击事件，首页常用
-│           ├── index.js
-│           ├── index.json
-│           ├── index.wxml
-│           └── index.wxss
+│       ├── notice-card-list/   // 公示卡片横滑组件：横向滑动展示社区公示信息，支持点击事件，首页常用
+│       │   ├── index.js
+│       │   ├── index.json
+│       │   ├── index.wxml
+│       │   └── index.wxss
+│       ├── status-tab/         // 状态筛选tab组件：横向滚动tab，支持筛选、动画、全局复用
+│       │   ├── index.js
+│       │   ├── index.json
+│       │   ├── index.wxml
+│       │   └── index.wxss
+│       └── common/          // 通用组件
 │
 ├── constants/            // 常量定义目录
 │   └── index.js         // 各类常量（如API、路由、资源路径等）
@@ -59,6 +67,15 @@
 │       ├── quickPhoto.json    // 页面配置：设置导航栏标题等
 │       ├── quickPhoto.wxml    // 页面结构：包含拍照上传、问题描述、地址信息等模块
 │       └── quickPhoto.wxss    // 页面样式：定义渐变背景、卡片布局、按钮样式等
+│
+├── workOrderList/     // 工单列表页面
+│   ├── workOrderList.js      // 工单列表逻辑，状态管理、跳转、筛选
+│   ├── workOrderList.json    // 页面配置，引用tab组件
+│   ├── workOrderList.wxml    // 页面结构，卡片列表、空状态、悬浮按钮
+│   └── workOrderList.wxss    // 页面样式，卡片、按钮、动画等
+│
+├── workOrderDetail/   // 工单详情页面（预留）
+│   ├── ...
 │
 ├── package.json         // 项目依赖配置
 └── project.config.json  // 项目配置文件
