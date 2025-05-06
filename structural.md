@@ -2,9 +2,22 @@
 ├── app.js                // 小程序全局逻辑入口，定义全局数据、生命周期等
 ├── app.json              // 小程序全局配置，包含页面路由、窗口样式、tabBar配置、权限声明等
 │   ├── pages            // 页面路由配置
+│   │   ├── index/index          // 首页（展示页面）
+│   │   ├── party/index          // 党建首页
+│   │   ├── party/list           // 党建活动列表
+│   │   ├── party/detail         // 党建活动详情
+│   │   ├── login/login          // 登录页面
+│   │   ├── user/index/index     // 用户中心
+│   │   ├── grid/index/index     // 网格员中心
+│   │   ├── quickPhoto/quickPhoto // 随手拍页面
+│   │   ├── workOrderList/workOrderList // 工单列表
+│   │   └── workOrderDetail/workOrderDetail // 工单详情
 │   ├── window          // 全局窗口样式
 │   ├── tabBar          // 底部导航栏配置
+│   │   ├── 首页（展示页面）
+│   │   └── 随手拍（需要登录）
 │   ├── permission      // 权限声明配置
+│   │   └── 位置权限（用于随手拍定位）
 │   └── style           // 全局样式版本
 ├── app.wxss              // 小程序全局样式
 │
@@ -57,13 +70,17 @@
 │   └── request.js       // 网络请求封装
 │
 ├── pages/               // 页面目录
-│   ├── index/          // 首页
-│   │   ├── index.js    // 首页逻辑
+│   ├── index/          // 首页（展示页面）
+│   │   ├── index.js    // 首页逻辑：展示社区信息、党建活动、社区活动、公示信息等
 │   │   ├── index.json  // 首页配置
 │   │   ├── index.wxml  // 首页结构
 │   │   └── index.wxss  // 首页样式
+│   ├── party/          // 党建相关页面
+│   │   ├── index.js    // 党建首页逻辑
+│   │   ├── list.js     // 党建活动列表逻辑
+│   │   └── detail.js   // 党建活动详情逻辑
 │   └── quickPhoto/     // 随手拍页面
-│       ├── quickPhoto.js      // 页面逻辑：处理拍照、表单提交、定位等功能
+│       ├── quickPhoto.js      // 页面逻辑：处理拍照、表单提交、定位等功能，包含登录检查
 │       ├── quickPhoto.json    // 页面配置：设置导航栏标题等
 │       ├── quickPhoto.wxml    // 页面结构：包含拍照上传、问题描述、地址信息等模块
 │       └── quickPhoto.wxss    // 页面样式：定义渐变背景、卡片布局、按钮样式等
@@ -87,3 +104,18 @@
     │   ├── packNpmManually      // 手动构建npm
     │   └── packNpmRelationList  // npm包关系配置
     └── editorSetting   // 编辑器设置
+
+更新说明：
+1. 页面路由调整：
+   - 首页（index）作为展示页面，展示社区信息、党建活动等
+   - 随手拍（quickPhoto）作为 tabBar 入口，需要登录才能使用
+   - 党建相关页面（party）放在首页之后，方便用户访问
+
+2. 功能变更：
+   - 随手拍页面添加登录检查，未登录用户会提示并跳转到登录页面
+   - 首页作为展示页面，不需要登录即可访问
+   - 党建活动页面作为展示内容的一部分，增强社区文化建设
+
+3. 权限配置：
+   - 保留位置权限配置，用于随手拍功能
+   - 其他权限根据实际需求配置

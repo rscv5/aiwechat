@@ -1,17 +1,20 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/party/index",
+    "pages/party/list",
+    "pages/party/detail",
+    "pages/login/login",
+    "pages/user/index/index",
+    "pages/grid/index/index",
     "pages/quickPhoto/quickPhoto",
     "pages/workOrderList/workOrderList",
-    "pages/workOrderDetail/workOrderDetail",
-    "pages/party/detail",
-    "pages/party/index",
-    "pages/party/list"
+    "pages/workOrderDetail/workOrderDetail"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "智慧明发",
+    "navigationBarTitleText": "智慧社区",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
@@ -27,7 +30,7 @@
         "selectedIconPath": "assets/icons/home-active.png"
       },
       {
-        "pagePath": "pages/workOrderList/workOrderList",
+        "pagePath": "pages/quickPhoto/quickPhoto",
         "text": "随手拍",
         "iconPath": "assets/icons/camera.png",
         "selectedIconPath": "assets/icons/camera-active.png"

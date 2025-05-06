@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="title">智慧社区</text>
+  </view>
+
+  <view class="login-box">
+    <view class="login-type">
+      <view class="type-item {{loginType === 'user' ? 'active' : ''}}" bindtap="switchLoginType" data-type="user">
+        普通用户登录
+      </view>
+      <view class="type-item {{loginType === 'grid' ? 'active' : ''}}" bindtap="switchLoginType" data-type="grid">
+        网格员登录
+      </view>
+      <view class="type-item {{loginType === 'area' ? 'active' : ''}}" bindtap="switchLoginType" data-type="area">
+        片区长登录
+      </view>
+    </view>
+
+    <!-- 普通用户登录 -->
+    <view class="login-form" wx:if="{{loginType === 'user'}}">
+      <button class="login-btn" type="primary" bindtap="userLogin">微信一键登录</button>
+    </view>
+
+    <!-- 网格员/片区长登录 -->
+    <view class="login-form" wx:if="{{loginType === 'grid' || loginType === 'area'}}">
+      <view class="form-item">
+        <input class="input" placeholder="请输入账号" bindinput="onUsernameInput" value="{{username}}"/>
+      </view>
+      <view class="form-item">
+        <input class="input" password placeholder="请输入密码" bindinput="onPasswordInput" value="{{password}}"/>
+      </view>
+      <button class="login-btn" type="primary" bindtap="gridLogin">登录</button>
+    </view>
+  </view>
+</view> 

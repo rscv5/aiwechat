@@ -21,6 +21,26 @@ Page({
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
+        // 检查是否已登录
+        const userInfo = wx.getStorageSync('userInfo');
+        if (!userInfo) {
+            wx.showModal({
+                title: '提示',
+                content: '请先登录后再使用随手拍功能',
+                showCancel: false,
+                success: () => {
+                    wx.switchTab({
+                        url: '/pages/index/index'
+                    });
+                    setTimeout(() => {
+                        wx.navigateTo({
+                            url: '/pages/login/login'
+                        });
+                    }, 100);
+                }
+            });
+            return;
+        }
         this.getLocation();
     },
 

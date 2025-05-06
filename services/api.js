@@ -48,21 +48,93 @@ export const workOrderApi = {
 }
 
 // 用户相关接口
+const baseUrl = 'http://localhost:8080'
+
 export const userApi = {
-  // 用户登录
-  login: (data) => {
-    return request({
-      url: '/user/login',
-      method: 'POST',
-      data
+  // 网格员/片区长登录
+  gridLogin: (username, password) => {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${baseUrl}/api/grid/login`,
+        method: 'POST',
+        header: {
+          'content-type': 'application/json',
+          'Accept': 'application/json'
+        },
+        data: {
+          username: username,
+          password: password
+        },
+        success: (res) => {
+          console.log('Grid login response:', res)
+          if (res.statusCode === 200) {
+            resolve(res.data)
+          } else {
+            reject(new Error(res.data.message || '登录失败'))
+          }
+        },
+        fail: (err) => {
+          console.error('Grid login request failed:', err)
+          reject(new Error(err.errMsg || '网络请求失败'))
+        }
+      })
     })
   },
-  
+
+  // 用户登录
+  userLogin: (openid) => {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${baseUrl}/api/user/login`,
+        method: 'POST',
+        header: {
+          'content-type': 'application/json',
+          'Accept': 'application/json'
+        },
+        data: {
+          openid: openid
+        },
+        success: (res) => {
+          console.log('User login response:', res)
+          if (res.statusCode === 200) {
+            resolve(res.data)
+          } else {
+            reject(new Error(res.data.message || '登录失败'))
+          }
+        },
+        fail: (err) => {
+          console.error('User login request failed:', err)
+          reject(new Error(err.errMsg || '网络请求失败'))
+        }
+      })
+    })
+  },
+
   // 获取用户信息
-  getUserInfo: () => {
-    return request({
-      url: '/user/info',
-      method: 'GET'
+  getUserInfo: (openid) => {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${baseUrl}/api/user/info`,
+        method: 'GET',
+        header: {
+          'Accept': 'application/json'
+        },
+        data: {
+          openid: openid
+        },
+        success: (res) => {
+          console.log('Get user info response:', res)
+          if (res.statusCode === 200) {
+            resolve(res.data)
+          } else {
+            reject(new Error(res.data.message || '获取用户信息失败'))
+          }
+        },
+        fail: (err) => {
+          console.error('Get user info request failed:', err)
+          reject(new Error(err.errMsg || '网络请求失败'))
+        }
+      })
     })
   }
 } 

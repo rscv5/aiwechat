@@ -54,7 +54,7 @@
 
     </view>
     <view class="phone-row">
-        <text>详细位置:</text>
+        <text>楼    栋   号: </text>
         <view class="input-field">
         <input 
           type="number" 
