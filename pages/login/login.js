@@ -1,130 +1,164 @@
+import authService from '../../services/auth';
+import permission from '../../utils/permission';
+import auth from '../../utils/auth';
+
 const app = getApp()
 
 Page({
   data: {
-    loginType: 'user', // 默认普通用户登录
+    isAdminLogin: false, // 是否是管理员登录
     username: '',
-    password: ''
+    password: '',
+    loading: false,
+    isLoading: false,
+    showLoginForm: false
   },
 
-  onLoad: function() {
+  onLoad() {
     // 检查是否已登录
-    const token = wx.getStorageSync('token')
+    const token = wx.getStorageSync('token');
     if (token) {
-      // 已登录，跳转到首页
-      this.redirectToHome()
+      // 已登录，根据角色跳转到对应的随手拍页面
+      this.redirectByRole();
+      return;
+    }
+    
+    // 未登录，显示登录界面
+    this.setData({
+      showLoginForm: true
+    });
+  },
+
+  // 根据角色跳转到对应的随手拍页面
+  redirectByRole() {
+    const role = auth.getUserRole();
+    switch (role) {
+      case '网格员':
+        wx.redirectTo({
+          url: '/pages/grid/index'
+        });
+        break;
+      case '片区长':
+        wx.redirectTo({
+          url: '/pages/admin/workorder/create'
+        });
+        break;
+      default:
+        wx.redirectTo({
+          url: '/pages/user/workorder/create'
+        });
     }
   },
 
-  // 切换登录类型
-  switchLoginType: function(e) {
-    const type = e.currentTarget.dataset.type
+  // 切换登录方式
+  switchLoginType() {
     this.setData({
-      loginType: type,
-      username: '',
-      password: ''
-    })
+      isAdminLogin: !this.data.isAdminLogin
+    });
   },
 
-  // 用户名输入
-  onUsernameInput: function(e) {
+  // 输入用户名
+  onUsernameInput(e) {
     this.setData({
       username: e.detail.value
-    })
+    });
   },
 
-  // 密码输入
-  onPasswordInput: function(e) {
+  // 输入密码
+  onPasswordInput(e) {
     this.setData({
       password: e.detail.value
-    })
+    });
   },
 
-  // 普通用户登录
-  userLogin: function() {
-    wx.showLoading({
-      title: '登录中...',
-      mask: true
-    })
-
-    app.userLogin()
-      .then(user => {
-        wx.hideLoading()
-        wx.showToast({
-          title: '登录成功',
-          icon: 'success'
-        })
-        this.redirectToHome()
-      })
-      .catch(err => {
-        wx.hideLoading()
-        wx.showToast({
-          title: err.message || '登录失败',
-          icon: 'none'
-        })
-      })
+  // 微信登录
+  handleWxLogin() {
+    this.setData({ isLoading: true });
+    
+    wx.login({
+      success: (res) => {
+        if (res.code) {
+          // 发送code到后端
+          wx.request({
+            url: 'http://localhost:8080/api/user/login',
+            method: 'POST',
+            data: {
+              code: res.code
+            },
+            success: (response) => {
+              if (response.data.token) {
+                // 保存token和用户角色
+                wx.setStorageSync('token', response.data.token);
+                wx.setStorageSync('userRole', response.data.role);
+                
+                // 跳转到对应的随手拍页面
+                this.redirectByRole();
+              } else {
+                wx.showToast({
+                  title: '登录失败',
+                  icon: 'none'
+                });
+              }
+            },
+            fail: () => {
+              wx.showToast({
+                title: '网络错误',
+                icon: 'none'
+              });
+            },
+            complete: () => {
+              this.setData({ isLoading: false });
+            }
+          });
+        }
+      }
+    });
   },
 
-  // 网格员/片区长登录
-  gridLogin: function() {
-    const { username, password, loginType } = this.data
-
+  // 管理员登录
+  handleAdminLogin() {
+    const { username, password } = this.data;
     if (!username || !password) {
       wx.showToast({
-        title: '请输入账号和密码',
+        title: '请输入用户名和密码',
         icon: 'none'
-      })
-      return
+      });
+      return;
     }
 
-    wx.showLoading({
-      title: '登录中...',
-      mask: true
-    })
+    this.setData({ isLoading: true });
 
-    app.gridLogin(username, password)
-      .then(user => {
-        wx.hideLoading()
-        // 检查用户角色是否匹配
-        if ((loginType === 'grid' && user.role === '网格员') || 
-            (loginType === 'area' && user.role === '片区长')) {
-          wx.showToast({
-            title: '登录成功',
-            icon: 'success'
-          })
-          this.redirectToHome()
+    wx.request({
+      url: 'http://localhost:8080/api/grid/login',
+      method: 'POST',
+      data: {
+        username: username,
+        password: password
+      },
+      success: (res) => {
+        if (res.data.token) {
+          // 保存token和用户角色
+          wx.setStorageSync('token', res.data.token);
+          wx.setStorageSync('userRole', res.data.role);
+          
+          // 跳转到对应的随手拍页面
+          this.redirectByRole();
         } else {
           wx.showToast({
-            title: '账号类型不匹配',
+            title: '登录失败',
             icon: 'none'
-          })
+          });
         }
-      })
-      .catch(err => {
-        wx.hideLoading()
+      },
+      fail: () => {
         wx.showToast({
-          title: err.message || '登录失败',
+          title: '网络错误',
           icon: 'none'
-        })
-      })
-  },
-
-  // 跳转到首页
-  redirectToHome: function() {
-    const userInfo = wx.getStorageSync('userInfo')
-    if (!userInfo) {
-      return
-    }
-
-    let targetPage = '/pages/user/index/index'
-    if (userInfo.role === '网格员') {
-      targetPage = '/pages/grid/index/index'
-    } else if (userInfo.role === '片区长') {
-      targetPage = '/pages/area/index/index'
-    }
-
-    wx.redirectTo({
-      url: targetPage
-    })
+        });
+      },
+      complete: () => {
+        this.setData({ isLoading: false });
+      }
+    });
   }
 }) 

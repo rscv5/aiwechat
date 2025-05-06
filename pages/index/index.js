@@ -1,5 +1,6 @@
 // index.js
 const app = getApp()
+const auth = require('../../utils/auth');
 
 Page({
   data: {
@@ -133,5 +134,12 @@ Page({
     wx.navigateTo({
       url: `/pages/empty/index?title=公示详情&id=${id}`
     })
-  }
+  },
+
+  // 处理随手拍点击
+  handleCreateWorkorder: function() {
+    if (auth.checkLogin()) {
+      auth.redirectToWorkorder();
+    }
+  },
 })

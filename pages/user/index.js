@@ -1,6 +1,4 @@
-// pages/user/index/index.js
-const auth = require('../../../utils/auth');
-
+// pages/user/index.js
 Page({
 
     /**
@@ -64,12 +62,5 @@ Page({
      */
     onShareAppMessage() {
 
-    },
-
-    // 处理随手拍点击
-    handleCreateWorkorder: function() {
-        if (auth.checkLogin()) {
-            auth.redirectToWorkorder();
-        }
-    },
+    }
 })

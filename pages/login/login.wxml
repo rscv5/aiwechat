@@ -1,36 +1,42 @@
 <view class="container">
-  <view class="header">
-    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
-    <text class="title">智慧社区</text>
-  </view>
-
   <view class="login-box">
+    <view class="title">智慧明发社区</view>
+    
     <view class="login-type">
-      <view class="type-item {{loginType === 'user' ? 'active' : ''}}" bindtap="switchLoginType" data-type="user">
-        普通用户登录
+      <view class="type-item {{!isAdminLogin ? 'active' : ''}}" bindtap="switchLoginType">
+        用户微信登录
       </view>
-      <view class="type-item {{loginType === 'grid' ? 'active' : ''}}" bindtap="switchLoginType" data-type="grid">
-        网格员登录
-      </view>
-      <view class="type-item {{loginType === 'area' ? 'active' : ''}}" bindtap="switchLoginType" data-type="area">
-        片区长登录
+      <view class="type-item {{isAdminLogin ? 'active' : ''}}" bindtap="switchLoginType">
+        管理员登录
       </view>
     </view>
 
-    <!-- 普通用户登录 -->
-    <view class="login-form" wx:if="{{loginType === 'user'}}">
-      <button class="login-btn" type="primary" bindtap="userLogin">微信一键登录</button>
-    </view>
+    <block wx:if="{{isAdminLogin}}">
+      <view class="input-group">
+        <input 
+          class="input" 
+          placeholder="请输入用户名" 
+          value="{{username}}"
+          bindinput="onUsernameInput"
+        />
+        <input 
+          class="input" 
+          type="password" 
+          placeholder="请输入密码" 
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+      <button class="btn-login" bindtap="handleAdminLogin">登录</button>
+    </block>
 
-    <!-- 网格员/片区长登录 -->
-    <view class="login-form" wx:if="{{loginType === 'grid' || loginType === 'area'}}">
-      <view class="form-item">
-        <input class="input" placeholder="请输入账号" bindinput="onUsernameInput" value="{{username}}"/>
+    <block wx:else>
+      <view class="wx-login">
+        <button class="btn-wx-login" open-type="getUserInfo" bindgetuserinfo="handleWxLogin">
+          <image class="wx-icon" src="/assets/images/wx-icon.png" />
+          <text>微信一键登录</text>
+        </button>
       </view>
-      <view class="form-item">
-        <input class="input" password placeholder="请输入密码" bindinput="onPasswordInput" value="{{password}}"/>
-      </view>
-      <button class="login-btn" type="primary" bindtap="gridLogin">登录</button>
-    </view>
+    </block>
   </view>
 </view> 
