@@ -66,11 +66,12 @@ export const userApi = {
           password: password
         },
         success: (res) => {
-          console.log('Grid login response:', res)
-          if (res.statusCode === 200) {
+          //console.log('Grid login response:', res)
+          //console.log('Stored token:', wx.getStorageSync('auth_token'));
+          if (res.statusCode === 200 && res.data) {
             resolve(res.data)
           } else {
-            reject(new Error(res.data.message || '登录失败'))
+            reject(new Error(res.data?.message || '登录失败'))
           }
         },
         fail: (err) => {
@@ -82,7 +83,7 @@ export const userApi = {
   },
 
   // 用户登录
-  userLogin: (openid) => {
+  userLogin: (code) => {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/user/login`,
@@ -92,14 +93,15 @@ export const userApi = {
           'Accept': 'application/json'
         },
         data: {
-          openid: openid
+          code: code
         },
         success: (res) => {
-          console.log('User login response:', res)
-          if (res.statusCode === 200) {
+          //console.log('User login response:', res)
+          //console.log('登录成功后储存的token:', wx.getStorageSync('auth_token'));
+          if (res.statusCode === 200 && res.data) {
             resolve(res.data)
           } else {
-            reject(new Error(res.data.message || '登录失败'))
+            reject(new Error(res.data?.message || '登录失败'))
           }
         },
         fail: (err) => {
@@ -111,30 +113,73 @@ export const userApi = {
   },
 
   // 获取用户信息
-  getUserInfo: (openid) => {
+  getUserInfo: (token) => {
+    console.log('请求获取用户信息前的Token:', token);
+    console.log('=== 开始获取用户信息 ===');
+    console.log('1. 请求前的Token:', token);
+    console.log('2. 请求URL:', `${baseUrl}/api/user/info`);
+    console.log('3. 请求头:', {
+       'content-type': 'application/json',
+       'Accept': 'application/json',
+       'Authorization': `Bearer ${token}`
+    });
+
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/user/info`,
         method: 'GET',
         header: {
-          'Accept': 'application/json'
-        },
-        data: {
-          openid: openid
+          'content-type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         success: (res) => {
           console.log('Get user info response:', res)
-          if (res.statusCode === 200) {
+          console.log('4. 响应状态码:', res.statusCode);
+          console.log('5. 响应数据:', res.data);
+          console.log('6. 响应头:', res.header);
+          if (res.statusCode === 200 && res.data) {
+            console.log('7. 请求成功，返回数据');
             resolve(res.data)
+          } else if (res.statusCode === 403) {
+            console.log('7. 请求失败,状态码403');
+            console.log('8. 错误信息:', res.data);
+            // 只有在确认是 token 过期时才清除
+            if (res.data?.message?.includes('token expired')) {
+              console.log('9. 清除token');
+              wx.removeStorageSync('auth_token')
+              wx.removeStorageSync('userInfo')
+              wx.removeStorageSync('userRole')
+            }
+            reject(new Error('登录已过期，请重新登录'))
           } else {
-            reject(new Error(res.data.message || '获取用户信息失败'))
+            console.log('7. 请求失败,其他错误');
+            reject(new Error(res.data?.message || '获取用户信息失败'))
           }
         },
         fail: (err) => {
-          console.error('Get user info request failed:', err)
+          console.log('4. 请求失败:', err);
+          //console.error('Get user info request failed:', err)
           reject(new Error(err.errMsg || '网络请求失败'))
         }
       })
     })
+  },
+
+  // 刷新 token
+  refreshToken: async () => {
+    const refreshToken = wx.getStorageSync('refresh_token');
+    // 如果refresh_token不存在，则抛出错误
+    if (!refreshToken) {
+      throw new Error('No refresh token');
+    }
+    // 发送刷新token的请求
+    const response = await request({    
+      url: '/api/auth/refresh',
+      method: 'POST',
+      data: { refreshToken }
+    });
+    // 返回新的token
+    return response.token;
   }
 } 

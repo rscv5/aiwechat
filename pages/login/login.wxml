@@ -4,7 +4,7 @@
     
     <view class="login-type">
       <view class="type-item {{!isAdminLogin ? 'active' : ''}}" bindtap="switchLoginType">
-        用户微信登录
+        微信登录
       </view>
       <view class="type-item {{isAdminLogin ? 'active' : ''}}" bindtap="switchLoginType">
         管理员登录

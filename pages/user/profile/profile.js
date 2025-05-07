@@ -6,7 +6,7 @@ Page({
 
   onLoad: function() {
     // 检查是否已经登录
-    const token = wx.getStorageSync('token');
+    const token = wx.getStorageSync('auth_token');
     if (token) {
       this.getUserInfo();
     } else {
@@ -22,7 +22,7 @@ Page({
       url: 'http://localhost:8080/api/user/info',
       method: 'GET',
       header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('token')
+        'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
       },
       success: (res) => {
         if (res.data.code === 200) {

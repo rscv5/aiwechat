@@ -142,4 +142,11 @@ Page({
       auth.redirectToWorkorder();
     }
   },
+
+  // 处理 tabBar 点击
+  onTabItemTap(item) {
+    if (item.text === '随手拍') {
+      this.handleCreateWorkorder();
+    }
+  }
 })

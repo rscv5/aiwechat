@@ -1,6 +1,7 @@
 const checkLogin = () => {
-  const token = wx.getStorageSync('token');
+  const token = wx.getStorageSync('auth_token');
   if (!token) {
+    console.log('》》》No token found, redirecting to login page');
     wx.navigateTo({
       url: '/pages/login/login'
     });

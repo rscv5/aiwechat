@@ -1,0 +1,16 @@
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f8f8;
+}
+
+.loading {
+  text-align: center;
+}
+
+.loading-text {
+  color: #666;
+  font-size: 28rpx;
+} 
