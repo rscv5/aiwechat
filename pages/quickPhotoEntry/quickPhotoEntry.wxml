@@ -1,5 +1,0 @@
-<view class="container">
-  <view class="loading" wx:if="{{isLoading}}">
-    <view class="loading-text">正在跳转...</view>
-  </view>
-</view> 

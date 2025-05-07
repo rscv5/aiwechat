@@ -9,8 +9,7 @@
     "pages/grid/workorder/list",
     "pages/grid/workorder/detail",
     "pages/admin/workorder/list",
-    "pages/admin/workorder/detail",
-    "pages/quickPhotoEntry/quickPhotoEntry"
+    "pages/admin/workorder/detail"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -31,7 +30,7 @@
         "selectedIconPath": "assets/icons/home-active.png"
       },
       {
-        "pagePath": "pages/quickPhotoEntry/quickPhotoEntry",
+        "pagePath": "pages/login/login",
         "text": "随手拍",
         "iconPath": "assets/icons/camera.png",
         "selectedIconPath": "assets/icons/camera-active.png"
