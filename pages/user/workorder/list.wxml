@@ -1,2 +1,56 @@
-<!--pages/user/workorder/list.wxml-->
-<text>pages/user/workorder/list.wxml</text>
+<view class="container">
+  <!-- 状态标签页 -->
+  <view class="tabs">
+    <view 
+      wx:for="{{tabs}}" 
+      wx:key="index"
+      class="tab-item {{activeTab === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onTabChange"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <!-- 工单列表 -->
+  <view class="work-order-list">
+    <view wx:if="{{isLoading}}" class="loading">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+
+    <view wx:elif="{{workOrders.length === 0}}" class="empty-state">
+      <image src="/assets/icons/empty.png" mode="aspectFit"></image>
+      <text>暂无工单记录</text>
+    </view>
+
+    <view wx:else>
+      <view 
+        wx:for="{{workOrders}}" 
+        wx:key="id"
+        class="work-order-item"
+        data-id="{{item.id}}"
+        bindtap="goToDetail"
+      >
+        <view class="work-order-header">
+          <text class="title">{{item.title}}</text>
+          <text class="status" style="color: {{statusMap[item.status].color}}">
+            {{statusMap[item.status].text}}
+          </text>
+        </view>
+        <view class="work-order-content">
+          <text class="description">{{item.description}}</text>
+        </view>
+        <view class="work-order-footer">
+          <text class="time">{{item.createTime}}</text>
+          <text class="location">{{item.location}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部新建按钮 -->
+  <view class="create-button" bindtap="goToCreate">
+    <text>提交新工单</text>
+  </view>
+</view> 

@@ -48,7 +48,7 @@ export const workOrderApi = {
 }
 
 // 用户相关接口
-const baseUrl = 'http://localhost:8080'
+const baseUrl = 'http://127.0.0.1:8080'
 
 export const userApi = {
   // 网格员/片区长登录
@@ -66,20 +66,29 @@ export const userApi = {
           password: password
         },
         success: (res) => {
-          //console.log('Grid login response:', res)
-          //console.log('Stored token:', wx.getStorageSync('auth_token'));
+          console.log('Grid login response:', res);
           if (res.statusCode === 200 && res.data) {
-            resolve(res.data)
+            // 确保响应中包含 token
+            if (!res.data.token && !res.data.accessToken) {
+              console.error('登录响应中没有token:', res.data);
+              reject(new Error('登录响应数据不完整'));
+              return;
+            }
+            // 保存 token
+            const token = res.data.token || res.data.accessToken;
+            wx.setStorageSync('auth_token', token);
+            console.log('保存的token:', token);
+            resolve(res.data);
           } else {
-            reject(new Error(res.data?.message || '登录失败'))
+            reject(new Error(res.data?.message || '登录失败'));
           }
         },
         fail: (err) => {
-          console.error('Grid login request failed:', err)
-          reject(new Error(err.errMsg || '网络请求失败'))
+          console.error('Grid login request failed:', err);
+          reject(new Error(err.errMsg || '网络请求失败'));
         }
-      })
-    })
+      });
+    });
   },
 
   // 用户登录
@@ -96,20 +105,29 @@ export const userApi = {
           code: code
         },
         success: (res) => {
-          //console.log('User login response:', res)
-          //console.log('登录成功后储存的token:', wx.getStorageSync('auth_token'));
+          console.log('User login response:', res);
           if (res.statusCode === 200 && res.data) {
-            resolve(res.data)
+            // 确保响应中包含 token
+            if (!res.data.token && !res.data.accessToken) {
+              console.error('登录响应中没有token:', res.data);
+              reject(new Error('登录响应数据不完整'));
+              return;
+            }
+            // 保存 token
+            const token = res.data.token || res.data.accessToken;
+            wx.setStorageSync('auth_token', token);
+            console.log('保存的token:', token);
+            resolve(res.data);
           } else {
-            reject(new Error(res.data?.message || '登录失败'))
+            reject(new Error(res.data?.message || '登录失败'));
           }
         },
         fail: (err) => {
-          console.error('User login request failed:', err)
-          reject(new Error(err.errMsg || '网络请求失败'))
+          console.error('User login request failed:', err);
+          reject(new Error(err.errMsg || '网络请求失败'));
         }
-      })
-    })
+      });
+    });
   },
 
   // 获取用户信息

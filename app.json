@@ -5,11 +5,11 @@
     "pages/grid/index",
     "pages/admin/index",
     "pages/user/workorder/list",
-    "pages/user/workorder/create",
     "pages/grid/workorder/list",
     "pages/grid/workorder/detail",
     "pages/admin/workorder/list",
-    "pages/admin/workorder/detail"
+    "pages/admin/workorder/detail",
+    "pages/quickPhoto/quickPhoto"
   ],
   "window": {
     "backgroundTextStyle": "light",
