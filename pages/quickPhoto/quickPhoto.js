@@ -10,7 +10,6 @@ Page({
         images: [],
         content: '',
         location: '',
-        locationLoading: false,
         building: '',
         phone: '',
         canSubmit: false,
@@ -293,51 +292,61 @@ Page({
         });
 
         try {
-            // 本地开发：直接将工单数据保存到本地Storage，后续可切换为后端接口
-            // 1. 获取本地已有工单列表
-            let orders = wx.getStorageSync('workOrders') || [];
+            // 1. 获取用户信息
+            const userInfo = wx.getStorageSync('userInfo');
+            if (!userInfo || !userInfo.openid) {
+                throw new Error('请先登录');
+            }
 
-            // 2. 构造新工单数据
+            // 2. 上传图片（如果有）
+            let imageUrls = [];
+            if (this.data.images.length > 0) {
+                // TODO: 实现图片上传逻辑
+                // 这里需要调用文件上传接口
+                // 暂时使用本地路径
+                imageUrls = this.data.images;
+            }
+
+            // 3. 构造工单数据
             const orderData = {
-                images: this.data.images, // 本地开发直接存图片路径，后端时可存imageUrls
-                content: this.data.content,
-                location: this.data.location,
-                building: this.data.building,
-                phone: this.data.phone,
-                createTime: formatDate(new Date()), // 使用标准格式
-                status: 'pending', // 默认待处理
-                id: Date.now() // 用时间戳做唯一ID
+                userOpenid: userInfo.openid,
+                title: this.data.content.substring(0, 50), // 取前50个字符作为标题
+                description: this.data.content,
+                imageUrls: imageUrls.join(','), // 将图片URL数组转换为逗号分隔的字符串
+                address: this.data.location, // 使用address字段存储地址字符串
+                buildingInfo: this.data.building,
+                status: '未领取' // 使用正确的状态值
             };
 
-            // 3. 添加到工单列表
-            orders.unshift(orderData);
-
-            // 4. 存回本地
-            wx.setStorageSync('workOrders', orders);
-
-            // 5. 提示成功并返回
-            wx.hideLoading();
-            wx.showToast({
-                title: '提交成功',
-                icon: 'success'
+            // 4. 调用后端API提交工单
+            const response = await wx.request({
+                url: 'http://127.0.0.1:8080/api/workorder/create',
+                method: 'POST',
+                header: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
+                },
+                data: orderData
             });
-            setTimeout(() => {
-                wx.navigateBack();
-            }, 1500);
 
-            // ====== 后端接口上线后可替换为如下伪代码 =====
-            // 1. 上传图片（如有）
-            // 2. 调用后端API提交工单
-            // await request({
-            //   url: '/orders',
-            //   method: 'POST',
-            //   data: orderData
-            // });
+            // 5. 处理响应
+            if (response.statusCode === 200 && response.data.code === 200) {
+                wx.hideLoading();
+                wx.showToast({
+                    title: '提交成功',
+                    icon: 'success'
+                });
+                setTimeout(() => {
+                    wx.navigateBack();
+                }, 1500);
+            } else {
+                throw new Error(response.data.message || '提交失败');
+            }
         } catch (error) {
             console.error('Submit error:', error);
             wx.hideLoading();
             wx.showToast({
-                title: '提交失败，请重试',
+                title: (error && error.message) || (error && error.data && error.data.message) || '提交失败，请重试',
                 icon: 'none'
             });
         } finally {
