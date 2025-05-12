@@ -122,6 +122,50 @@ const authService = {
   getUserRole() {
     const userInfo = this.getUserInfo();
     return userInfo ? userInfo.role : null;
+  },
+
+  async request(options) {
+    // 合并配置
+    const config = {
+      url: options.url.startsWith('http') ? options.url : `${BASE_URL}${options.url}`,
+      method: options.method || 'GET',
+      data: options.data,
+      header: {
+        'content-type': 'application/json',
+        ...options.header
+      }
+    };
+
+    // 添加token
+    const token = authService.getToken();
+    if (token) {
+      config.header.Authorization = `Bearer ${token}`;
+    }
+
+    // 用 Promise 包装 wx.request
+    return new Promise((resolve, reject) => {
+      wx.request({
+        ...config,
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.data);
+          } else if (res.statusCode === 401) {
+            authService.clearAuth();
+            wx.redirectTo({
+              url: '/pages/login/login'
+            });
+            reject(new Error('登录已过期，请重新登录'));
+          } else {
+            const error = new Error(res.data?.message || '请求失败');
+            error.response = res;
+            reject(error);
+          }
+        },
+        fail: (err) => {
+          reject(new Error(err.errMsg || '网络请求失败，请稍后重试'));
+        }
+      });
+    });
   }
 };
 

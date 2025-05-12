@@ -8,8 +8,8 @@
     "pages/grid/workorder/list",
     "pages/grid/workorder/detail",
     "pages/admin/workorder/list",
-    "pages/admin/workorder/detail",
-    "pages/quickPhoto/quickPhoto"
+    "pages/quickPhoto/quickPhoto",
+    "pages/workOrderDetail/workOrderDetail"
   ],
   "window": {
     "backgroundTextStyle": "light",

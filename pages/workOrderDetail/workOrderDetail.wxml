@@ -1,51 +1,153 @@
 <view class="detail-container">
-  <!-- 图片浏览区 -->
-  <scroll-view class="image-scroll" scroll-x enable-flex>
-    <block wx:for="{{order.images}}" wx:key="index">
-      <image
-        class="order-image"
-        src="{{item}}"
-        mode="aspectFill"
-        bindtap="previewImage"
-        data-index="{{index}}"
-      />
-    </block>
-  </scroll-view>
-
-  <!-- 工单信息 -->
-  <view class="info-card">
-    <view class="info-row">
-      <text class="info-label">楼栋</text>
-      <text class="info-value">{{order.building}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">提交时间</text>
-      <text class="info-value">{{order.createTime}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">联系电话</text>
-      <text class="info-value">{{maskedPhone}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">问题描述</text>
-      <text class="info-value">{{order.content}}</text>
-    </view>
-    <view class="info-row">
-      <text class="info-label">定位</text>
-      <text class="info-value">{{order.location}}</text>
-    </view>
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
   </view>
 
-  <!-- 处理进度 -->
-  <view class="progress-card">
-    <text class="progress-title">处理进度</text>
-    <view class="progress-step {{order.status}}">
-      <block wx:if="{{order.status === 'pending'}}">待处理</block>
-      <block wx:elif="{{order.status === 'processing'}}">处理中</block>
-      <block wx:elif="{{order.status === 'done'}}">已完成</block>
-      <block wx:else>未知</block>
-    </view>
+  <!-- 错误提示 -->
+  <view wx:elif="{{error}}" class="error">
+    <image src="/assets/icons/error.png" mode="aspectFit"></image>
+    <text>{{error}}</text>
+    <button class="retry-btn" bindtap="loadWorkOrderDetail">重试</button>
   </view>
+
+  <!-- 工单详情 -->
+  <block wx:elif="{{workOrder}}">
+    <!-- 工单状态 -->
+    <view class="status-card">
+      <text class="status {{workOrder.status === '未领取' ? 'pending' : workOrder.status === '处理中' ? 'processing' : workOrder.status === '已上报' ? 'reported' : 'done'}}">
+        {{workOrder.status}}
+      </text>
+    </view>
+
+    <!-- 工单基本信息 -->
+    <view class="info-card">
+      <view class="info-row">
+        <text class="info-label">楼栋</text>
+        <text class="info-value">{{workOrder.buildingInfo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">提交时间</text>
+        <text class="info-value">{{workOrder.createdAt}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">提交人</text>
+        <text class="info-value">{{workOrder.submitterName || '未知'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">联系电话</text>
+        <text class="info-value">{{workOrder.submitterPhone || '未提供'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">问题描述</text>
+        <text class="info-value description">{{workOrder.description}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">地址</text>
+        <text class="info-value">{{workOrder.address || '未提供'}}</text>
+      </view>
+    </view>
+
+    <!-- 工单图片 -->
+    <view class="image-card" wx:if="{{workOrder.imageUrls}}">
+      <text class="card-title">问题图片</text>
+      <scroll-view class="image-scroll" scroll-x enable-flex>
+        <block wx:for="{{workOrder.imageUrls}}" wx:key="index">
+          <image
+            class="order-image"
+            src="{{item}}"
+            mode="aspectFill"
+            bindtap="previewImage"
+            data-type="workOrder"
+            data-index="{{index}}"
+          />
+        </block>
+      </scroll-view>
+    </view>
+
+    <!-- 处理信息 -->
+    <view class="info-card" wx:if="{{workOrder.handledBy}}">
+      <text class="card-title">处理信息</text>
+      <view class="info-row">
+        <text class="info-label">处理人</text>
+        <text class="info-value">{{workOrder.handlerName || '未知'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">联系电话</text>
+        <text class="info-value">{{workOrder.handlerPhone || '未提供'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">处理说明</text>
+        <text class="info-value description">{{workOrder.handledDesc}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">处理时间</text>
+        <text class="info-value">{{workOrder.updatedAt}}</text>
+      </view>
+    </view>
+
+    <!-- 处理图片 -->
+    <view class="image-card" wx:if="{{workOrder.handledImages}}">
+      <text class="card-title">处理图片</text>
+      <scroll-view class="image-scroll" scroll-x enable-flex>
+        <block wx:for="{{workOrder.handledImages}}" wx:key="index">
+          <image
+            class="order-image"
+            src="{{item}}"
+            mode="aspectFill"
+            bindtap="previewImage"
+            data-type="handled"
+            data-index="{{index}}"
+          />
+        </block>
+      </scroll-view>
+    </view>
+
+    <!-- 处理记录 -->
+    <view class="processing-card" wx:if="{{workOrder.processingLogs.length > 0}}">
+      <text class="card-title">处理记录</text>
+      <view class="timeline">
+        <view class="timeline-item" wx:for="{{workOrder.processingLogs}}" wx:key="logId">
+          <view class="timeline-dot"></view>
+          <view class="timeline-content">
+            <view class="timeline-header">
+              <text class="operator">{{item.operatorRole}}</text>
+              <text class="time">{{item.actionTime}}</text>
+            </view>
+            <text class="action">{{item.actionType}}</text>
+            <text class="description" wx:if="{{item.actionDescription}}">{{item.actionDescription}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 反馈信息 -->
+    <view class="feedback-card" wx:if="{{workOrder.feedbackList.length > 0}}">
+      <text class="card-title">反馈信息</text>
+      <view class="feedback-list">
+        <view class="feedback-item" wx:for="{{workOrder.feedbackList}}" wx:key="feedbackId">
+          <view class="feedback-header">
+            <text class="handler">{{item.handlerRole}}</text>
+            <text class="time">{{item.feedbackTime}}</text>
+          </view>
+          <text class="description">{{item.feedbackDescription}}</text>
+          <scroll-view class="image-scroll" scroll-x enable-flex wx:if="{{item.feedbackImages}}">
+            <block wx:for="{{item.feedbackImages}}" wx:key="index">
+              <image
+                class="feedback-image"
+                src="{{item}}"
+                mode="aspectFill"
+                bindtap="previewImage"
+                data-type="feedback"
+                data-index="{{index}}"
+              />
+            </block>
+          </scroll-view>
+        </view>
+      </view>
+    </view>
+  </block>
 
   <!-- 返回按钮 -->
   <button class="back-btn" bindtap="goBack">返回</button>

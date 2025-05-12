@@ -30,27 +30,30 @@ const request = {
       config.header.Authorization = `Bearer ${token}`;
     }
 
-    try {
-      const res = await wx.request(config);
-      
-      // 处理响应
-      if (res.statusCode === 200) {
-        return res.data;
-      } else if (res.statusCode === 401) {
-        // token过期，清除登录状态
-        authService.clearAuth();
-        // 跳转到登录页
-        wx.redirectTo({
-          url: '/pages/login/login'
-        });
-        throw new Error('登录已过期，请重新登录');
-      } else {
-        throw new Error(res.data.message || '请求失败');
-      }
-    } catch (error) {
-      console.error('请求失败:', error);
-      throw error;
-    }
+    // 用 Promise 包装 wx.request
+    return new Promise((resolve, reject) => {
+      wx.request({
+        ...config,
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.data);
+          } else if (res.statusCode === 401) {
+            authService.clearAuth();
+            wx.redirectTo({
+              url: '/pages/login/login'
+            });
+            reject(new Error('登录已过期，请重新登录'));
+          } else {
+            const error = new Error(res.data?.message || '请求失败');
+            error.response = res;
+            reject(error);
+          }
+        },
+        fail: (err) => {
+          reject(new Error(err.errMsg || '网络请求失败，请稍后重试'));
+        }
+      });
+    });
   },
 
   /**

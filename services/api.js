@@ -30,21 +30,13 @@ export const communityApi = {
 // 工单相关接口
 export const workOrderApi = {
   // 提交工单
-  submitWorkOrder: (data) => {
-    return request({
-      url: '/workorder/submit',
-      method: 'POST',
-      data
-    })
-  },
+  submitWorkOrder: (data) => request.post('/api/workorder/submit', data),
   
   // 获取工单列表
-  getWorkOrders: () => {
-    return request({
-      url: '/workorder/list',
-      method: 'GET'
-    })
-  }
+  getWorkOrders: () => request.get('/api/workorder/list'),
+
+  // 获取工单详情
+  getWorkOrderDetail: (workId) => request.get(`/api/workorder/${workId}`)
 }
 
 // 用户相关接口
@@ -96,7 +88,7 @@ export const userApi = {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/user/login`,
-        method: 'POST',
+      method: 'POST',
         header: {
           'content-type': 'application/json',
           'Accept': 'application/json'
@@ -129,7 +121,7 @@ export const userApi = {
       });
     });
   },
-
+  
   // 获取用户信息
   getUserInfo: (token) => {
     console.log('请求获取用户信息前的Token:', token);

@@ -224,7 +224,14 @@ Page({
     const id = e.currentTarget.dataset.id;
     console.log('跳转到工单详情:', id);
     wx.navigateTo({
-      url: `/pages/workOrderDetail/workOrderDetail?id=${id}`
+      url: `../../workOrderDetail/workOrderDetail?id=${id}`,
+      fail: (err) => {
+        console.error('跳转失败:', err);
+        wx.showToast({
+          title: '页面跳转失败',
+          icon: 'none'
+        });
+      }
     });
   },
 
