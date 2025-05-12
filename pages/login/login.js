@@ -93,11 +93,13 @@ Page({
     wx.setStorageSync('auth_token', token);
     wx.setStorageSync('userInfo', response);
     wx.setStorageSync('userRole', response.role);
+    wx.setStorageSync('user_openid', response.openid);  // 保存用户openid
     
     console.log('数据保存完成，当前存储状态:', {
       token: wx.getStorageSync('auth_token') ? '存在' : '不存在',
       userInfo: wx.getStorageSync('userInfo') ? '存在' : '不存在',
-      userRole: wx.getStorageSync('userRole') ? '存在' : '不存在'
+      userRole: wx.getStorageSync('userRole') ? '存在' : '不存在',
+      userOpenid: wx.getStorageSync('user_openid') ? '存在' : '不存在'
     });
   },
 

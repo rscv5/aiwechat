@@ -2,9 +2,5 @@
     "navigationBarTitleText": "提交随手拍",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTextStyle": "black",
-    "disableScroll": true,
-    "usingComponents": {
-        "section-title": "/components/common/section-title/index",
-        "community-header": "/components/common/community-header/index"
-    }
+    "disableScroll": true
 }

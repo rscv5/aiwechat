@@ -7,7 +7,7 @@ const COMMUNITY = {
 
 // API相关常量
 const API = {
-  BASE_URL: 'http://localhost:8080',
+  BASE_URL: 'http://127.0.0.1:8080',
   TIMEOUT: 5000,
   MAP_KEY: '3JDBZ-UF5WT-CYFXS-LRPKS-22BLO-7AFBN' // 我的腾讯地图 key
 }

@@ -1,45 +1,25 @@
 const app = getApp();
 const auth = require('../../../utils/auth');
 
-// Mock 数据
-const mockWorkOrders = [
-  {
-    id: 1,
-    title: '小区路灯损坏',
-    description: '3号楼前的路灯不亮了，影响夜间出行安全',
-    status: '待处理',
-    createTime: '2024-03-15 14:30',
-    location: '3号楼前'
-  },
-  {
-    id: 2,
-    title: '垃圾箱清理不及时',
-    description: '5号楼下的垃圾箱已经满了，需要及时清理',
-    status: '处理中',
-    createTime: '2024-03-14 09:15',
-    location: '5号楼'
-  },
-  {
-    id: 3,
-    title: '小区健身器材维修',
-    description: '健身区的跑步机出现故障，需要维修',
-    status: '已解决',
-    createTime: '2024-03-13 16:45',
-    location: '小区健身区'
-  }
-];
+
 
 Page({
   data: {
     activeTab: 0,
-    tabs: ['全部', '待处理', '处理中', '已解决'],
+    tabs: ['全部', '待处理', '处理中', '已解决'], // 状态标签
     workOrders: [],
     isLoading: true,
     statusMap: {
-      '待处理': { color: '#ff9800', text: '待处理' },
+      '未领取': { color: '#ff9800', text: '待处理' },
       '处理中': { color: '#2196f3', text: '处理中' },
-      '已解决': { color: '#4caf50', text: '已解决' }
-    }
+      '已上报': { color: '#2196f3', text: '处理中' }, // 添加已上报状态映射
+      '处理完': { color: '#4caf50', text: '已解决' }
+    }, // 状态映射
+    statusMapping: {
+      '待处理': '未领取',
+      '处理中': ['处理中', '已上报'], // 修改为数组，包含多个后端状态
+      '已解决': '处理完'
+    } // 状态映射 
   },
 
   // 页面加载时触发，只会触发一次
@@ -122,49 +102,110 @@ Page({
   async loadWorkOrders() {
     console.log('=== 开始加载工单列表 ===');
     try {
-      // 使用 mock 数据进行测试
-      const status = this.data.activeTab === 0 ? '' : this.data.tabs[this.data.activeTab];
-      console.log('当前筛选状态:', status);
-      
-      let filteredOrders = [...mockWorkOrders];
-      if (status) {
-        filteredOrders = mockWorkOrders.filter(order => order.status === status);
-      }
-
-      // 模拟网络延迟
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 更新页面数据
-      this.setData({
-        workOrders: filteredOrders
-      });
-      console.log('工单数据加载完成');
-
-      /* 后端接口准备好后，替换为以下代码
       const token = wx.getStorageSync('auth_token');
-      const res = await wx.request({
-        url: `${app.globalData.baseUrl}/api/workorders/user`,
-        method: 'GET',
-        header: {
-          'Authorization': `Bearer ${token}`
-        },
-        data: { status }
+      const userOpenid = wx.getStorageSync('user_openid');
+      let status = this.data.activeTab === 0 ? '全部' : this.data.tabs[this.data.activeTab];
+      
+      // 转换状态值为后端期望的值
+      if (status !== '全部') {
+        const mappedStatus = this.data.statusMapping[status];
+        // 如果是数组，说明需要查询多个状态
+        if (Array.isArray(mappedStatus)) {
+          status = mappedStatus.join(',');
+        } else {
+          status = mappedStatus;
+        }
+      }
+      
+      console.log('请求参数:', {
+        token: token ? '存在' : '不存在',
+        userOpenid: userOpenid ? '存在' : '不存在',
+        status: status,
+        baseUrl: app.globalData.baseUrl
       });
 
-      if (res.statusCode === 200) {
-        this.setData({
-          workOrders: res.data.data
-        });
-      } else {
-        throw new Error(res.data.message || '加载失败');
+      if (!userOpenid) {
+        throw new Error('用户未登录或登录已过期，请重新登录');
       }
-      */
+      
+      const url = `${app.globalData.baseUrl}/api/workorder/user`;
+      console.log('发送请求到:', url);
+      
+      // 使用Promise包装wx.request
+      const requestPromise = new Promise((resolve, reject) => {
+        wx.request({
+          url: url,
+          method: 'GET',
+          header: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          data: {
+            userOpenid: userOpenid,
+            status: status
+          },
+          success: (res) => {
+            console.log('请求成功，响应数据:', res);
+            resolve(res);
+          },
+          fail: (err) => {
+            console.error('请求失败:', err);
+            reject(new Error(err.errMsg || '网络请求失败'));
+          },
+          complete: () => {
+            console.log('请求完成');
+          }
+        });
+      });
+
+      const res = await requestPromise;
+      console.log('请求响应:', res);
+
+      if (!res) {
+        throw new Error('网络请求失败，请检查网络连接');
+      }
+
+      if (res.statusCode === 200 && res.data && res.data.code === 200) {
+        // 转换后端数据格式为前端所需格式
+        const workOrders = res.data.data.map(order => ({
+          id: order.workId,
+          title: order.title || order.description.substring(0, 50) + (order.description.length > 50 ? '...' : ''),
+          description: order.description,
+          status: this.data.statusMap[order.status]?.text || order.status, // 转换状态值为前端期望的值
+          createTime: order.createdAt,
+          location: order.address
+        }));
+
+        this.setData({
+          workOrders: workOrders
+        });
+        console.log('工单数据加载完成:', workOrders.length, '条记录');
+      } else {
+        console.error('请求失败:', {
+          statusCode: res.statusCode,
+          data: res.data
+        });
+        throw new Error(res.data?.message || '加载失败');
+      }
     } catch (error) {
       console.error('加载工单失败:', error);
-      wx.showToast({
-        title: error.message || '加载失败',
-        icon: 'none'
+      console.error('错误详情:', {
+        message: error.message,
+        stack: error.stack
       });
+      
+      if (error.message.includes('未登录') || error.message.includes('登录已过期')) {
+        // 如果是登录相关错误，跳转到登录页
+        wx.reLaunch({
+          url: '/pages/login/login'
+        });
+      } else {
+        wx.showToast({
+          title: (error && error.message) || (error && error.data && error.data.message) || '加载失败，请重试',
+          icon: 'none',
+          duration: 2000
+        });
+      }
     }
   },
 
@@ -181,7 +222,14 @@ Page({
   goToCreate() {
     console.log('跳转到新建工单');
     wx.navigateTo({
-      url: '/pages/quickPhoto/quickPhoto'
+        url: '/pages/quickPhoto/quickPhoto',
+        fail: (err) => {
+            console.error('跳转失败:', err);
+            wx.showToast({
+                title: '页面跳转失败',
+                icon: 'none'
+            });
+        }
     });
   }
 }); 
