@@ -167,14 +167,24 @@ Page({
 
       if (res.statusCode === 200 && res.data && res.data.code === 200) {
         // 转换后端数据格式为前端所需格式
-        const workOrders = res.data.data.map(order => ({
-          id: order.workId,
-          title: order.title || order.description.substring(0, 50) + (order.description.length > 50 ? '...' : ''),
-          description: order.description,
-          status: this.data.statusMap[order.status]?.text || order.status, // 转换状态值为前端期望的值
-          createTime: order.createdAt,
-          location: order.address
-        }));
+        const workOrders = res.data.data.map(order => {
+          // 格式化时间
+          const createTime = new Date(order.createdAt);
+          const formattedTime = `${createTime.getFullYear()}-${String(createTime.getMonth() + 1).padStart(2, '0')}-${String(createTime.getDate()).padStart(2, '0')} ${String(createTime.getHours()).padStart(2, '0')}:${String(createTime.getMinutes()).padStart(2, '0')}`;
+          
+          // 截取描述内容，限制显示长度
+          const description = order.description.length > 50 
+            ? order.description.substring(0, 50) + '...' 
+            : order.description;
+
+          return {
+            id: order.workId,
+            description: description,
+            status: this.data.statusMap[order.status]?.text || order.status,
+            createTime: formattedTime,
+            buildingInfo: order.buildingInfo || '未填写楼栋信息'
+          };
+        });
 
         this.setData({
           workOrders: workOrders

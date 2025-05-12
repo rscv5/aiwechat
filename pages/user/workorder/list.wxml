@@ -33,17 +33,16 @@
         bindtap="goToDetail"
       >
         <view class="work-order-header">
-          <text class="title">{{item.title}}</text>
-          <text class="status" style="color: {{statusMap[item.status].color}}">
-            {{statusMap[item.status].text}}
-          </text>
-        </view>
-        <view class="work-order-content">
-          <text class="description">{{item.description}}</text>
+          <view class="content-status">
+            <text class="description">{{item.description}}</text>
+            <text class="status {{item.status === '待处理' ? 'status-pending' : item.status === '处理中' ? 'status-processing' : 'status-done'}}">
+              {{item.status}}
+            </text>
+          </view>
         </view>
         <view class="work-order-footer">
-          <text class="time">{{item.createTime}}</text>
-          <text class="location">{{item.location}}</text>
+          <text class="building">楼栋号：{{item.buildingInfo}}</text>
+          <text class="time">提交时间：{{item.createTime}}</text>
         </view>
       </view>
     </view>
