@@ -383,7 +383,8 @@ Page({
                     imageUrls: imageUrls.join(','),
                     address: this.data.location,
                     buildingInfo: this.data.building,
-                    status: '未领取'
+                    status: '未领取',
+                    phone: this.data.phone
                 };
                 console.log('准备提交的工单数据:', orderData);
 
