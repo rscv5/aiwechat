@@ -1,4 +1,10 @@
 <view class="detail-container">
+  <!-- 主标题 -->
+  <view class="main-title">
+    工单详情
+    <view class="main-title-underline"></view>
+  </view>
+
   <!-- 加载状态 -->
   <view wx:if="{{isLoading}}" class="loading">
     <view class="loading-spinner"></view>
@@ -12,100 +18,84 @@
     <button class="retry-btn" bindtap="loadWorkOrderDetail">重试</button>
   </view>
 
-  <!-- 顶部状态和工单信息合并 -->
-  <view class="order-header">
-    <view class="order-status {{workOrder.status}}">
-      {{workOrder.statusText}}
+  <!-- 顶部状态卡片 -->
+  <view class="order-header" wx:if="{{workOrder}}">
+    <view class="order-status-tag {{statusClass}}">
+      {{workOrder.status || '未知状态'}}
     </view>
     <view class="order-info">
-      <text>工单编号：{{workOrder.id}}</text>
-      <!-- 其他信息 -->
+      <text>工单编号：{{workOrder.workId}}</text>
     </view>
   </view>
 
   <!-- 工单详情 -->
-  <block wx:elif="{{workOrder}}">
+  <block wx:if="{{workOrder}}">
     <!-- 工单基本信息 -->
     <view class="info-card">
-      <view class="info-row">
-        <text class="info-label">楼栋</text>
+      <view class="info-tag">
+        <image class="info-icon" src="../../assets/icons/building.png" mode="aspectFit" />
+        <text>楼栋</text>
         <text class="info-value">{{workOrder.buildingInfo}}</text>
       </view>
-      <view class="info-row">
-        <text class="info-label">联系电话</text>
+      <view class="info-tag">
+        <image class="info-icon" src="../../assets/icons/phone.png" mode="aspectFit" />
+        <text>联系电话</text>
         <text class="info-value">{{workOrder.submitterPhone || '未提供'}}</text>
       </view>
-      <view class="info-row">
-        <text class="info-label">问题描述</text>
-        <text class="info-value description">{{workOrder.description}}</text>
+      <view class="info-tag">
+        <image class="info-icon" src="../../assets/icons/desc.png" mode="aspectFit" />
+        <text>问题描述</text>
+        <text class="info-value">{{workOrder.description}}</text>
       </view>
-      <view class="info-row">
-        <text class="info-label">地址</text>
+      <view class="info-tag">
+        <image class="info-icon" src="../../assets/icons/location.png" mode="aspectFit" />
+        <text>地址</text>
         <text class="info-value">{{workOrder.address || '未提供'}}</text>
       </view>
-      
     </view>
 
     <!-- 工单图片 -->
-    <view class="image-card" wx:if="{{workOrder.imageUrls}}">
+    <view class="image-card">
       <text class="card-title">问题图片</text>
-      <scroll-view class="image-scroll" scroll-x enable-flex>
-        <block wx:for="{{workOrder.imageUrls}}" wx:key="index">
-          <image
-            class="order-image"
-            src="{{item}}"
-            mode="aspectFill"
-            bindtap="previewImage"
-            data-type="workOrder"
-            data-index="{{index}}"
-          />
+      <block wx:if="{{workOrder.imageUrls}}">
+        <scroll-view class="image-scroll" scroll-x enable-flex>
+          <block wx:for="{{workOrder.imageUrls}}" wx:key="index">
+            <image
+              class="order-image"
+              src="{{item}}"
+              mode="aspectFill"
+              bindtap="previewImage"
+              data-type="workOrder"
+              data-index="{{index}}"
+            />
+          </block>
+        </scroll-view>
+      </block>
+      <block wx:else>
+        <view class="image-placeholder">
+          <image src="../../assets/icons/no-image.png" class="placeholder-icon" mode="aspectFit" />
+          <text class="placeholder-text">暂无图片</text>
+        </view>
+      </block>
+    </view>
+
+    <!-- 时间线操作记录 -->
+    <view class="process-record" wx:if="{{workOrder.processingLogs && workOrder.processingLogs.length}}">
+      <text class="card-title">操作记录</text>
+      <view class="timeline">
+        <block wx:for="{{workOrder.processingLogs}}" wx:key="workId">
+          <view class="timeline-item">
+            <view class="timeline-dot">
+              <image class="timeline-icon" src="{{getProcessIcon(item.actionType || item.status)}}" mode="aspectFit" />
+            </view>
+            <view class="timeline-content">
+              <view class="timeline-row">
+                <text class="description">{{item.actionDescription}}</text>
+                <text class="timeline-time-label">{{item.createdAt || item.updatedAt || 'no time'}}</text>
+              </view>
+            </view>
+          </view>
         </block>
-      </scroll-view>
-    </view>
-
-    <!-- 处理信息 -->
-    <view class="info-card" wx:if="{{workOrder.handledBy}}">
-      <text class="card-title">处理信息</text>
-      <view class="info-row">
-        <text class="info-label">处理人</text>
-        <text class="info-value">{{workOrder.handlerName || '未知'}}</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">联系电话</text>
-        <text class="info-value">{{workOrder.handlerPhone || '未提供'}}</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">处理说明</text>
-        <text class="info-value description">{{workOrder.handledDesc}}</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">处理时间</text>
-        <text class="info-value">{{workOrder.updatedAt}}</text>
-      </view>
-    </view>
-
-    <!-- 处理图片 -->
-    <view class="image-card" wx:if="{{workOrder.handledImages}}">
-      <text class="card-title">处理图片</text>
-      <scroll-view class="image-scroll" scroll-x enable-flex>
-        <block wx:for="{{workOrder.handledImages}}" wx:key="index">
-          <image
-            class="order-image"
-            src="{{item}}"
-            mode="aspectFill"
-            bindtap="previewImage"
-            data-type="handled"
-            data-index="{{index}}"
-          />
-        </block>
-      </scroll-view>
-    </view>
-
-    <!-- 处理记录 -->
-    <view class="process-record">
-      <view class="process-item">
-        <text>用户提交工单</text>
-        <text class="process-time">{{workOrder.createdAt}}</text>
       </view>
     </view>
 
@@ -137,5 +127,7 @@
   </block>
 
   <!-- 返回按钮 -->
-  <button class="back-btn" bindtap="goBack">返回</button>
+  <view class="footer-bar">
+    <button class="back-btn" bindtap="goBack">返回</button>
+  </view>
 </view> 

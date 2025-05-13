@@ -6,7 +6,8 @@ Page({
     workId: null,
     workOrder: null,
     isLoading: true,
-    error: null
+    error: null,
+    statusClass: 'pending'
   },
 
   onLoad(options) {
@@ -54,7 +55,16 @@ Page({
           }));
         }
 
-        this.setData({ workOrder });
+        const statusClassMap = {
+          '未领取': 'unclaimed',
+          '处理中': 'processing',
+          '已完成': 'done',
+          // 其他状态...
+        };
+        this.setData({
+          workOrder,
+          statusClass: statusClassMap[workOrder.status] || 'pending'
+        });
       } else {
         throw new Error(res?.message || '获取工单详情失败');
       }
