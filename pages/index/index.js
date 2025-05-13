@@ -148,5 +148,32 @@ Page({
     if (item.text === '随手拍') {
       this.handleCreateWorkorder();
     }
+  },
+
+  // 上传单张图片，返回Promise
+  uploadSingleImage(filePath) {
+    return new Promise((resolve, reject) => {
+      wx.uploadFile({
+        url: `${app.globalData.baseUrl}/api/upload`,
+        filePath,
+        name: 'file',
+        header: {
+          'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
+        },
+        success: (res) => {
+          try {
+            const data = JSON.parse(res.data);
+            if (data.code === 200 && data.url) {
+              resolve(data.url);
+            } else {
+              reject(new Error(data.message || '上传失败'));
+            }
+          } catch (e) {
+            reject(new Error('图片上传响应解析失败'));
+          }
+        },
+        fail: reject
+      });
+    });
   }
 })

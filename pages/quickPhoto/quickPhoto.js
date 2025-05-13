@@ -169,6 +169,39 @@ Page({
         }
     },
 
+    // 上传单张图片，返回Promise
+    uploadSingleImage(filePath) {
+        console.log('=== 开始上传单张图片 ===', filePath);
+        return new Promise((resolve, reject) => {
+            wx.uploadFile({
+                url: `${app.globalData.baseUrl}/api/upload`,
+                filePath,
+                name: 'file',
+                header: {
+                    'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
+                },
+                success: (res) => {
+                    console.log('图片上传响应:', res);
+                    try {
+                        const data = JSON.parse(res.data);
+                        if (data.code === 200 && data.url) {
+                            // 只返回后端返回的图片访问URL
+                            resolve(data.url);
+                        } else if (data.url) {
+                            // 兼容后端只返回url的情况
+                            resolve(data.url);
+                        } else {
+                            reject(new Error(data.message || '上传失败'));
+                        }
+                    } catch (e) {
+                        reject(new Error('图片上传响应解析失败'));
+                    }
+                },
+                fail: reject
+            });
+        });
+    },
+
     // 预览图片
     previewImage(e) {
         console.log('=== 预览图片 ===', e.currentTarget.dataset.index);
@@ -336,7 +369,9 @@ Page({
     },
 
     // 提交工单
+    
     async submit() {
+        console.log('baseUrl:', app.globalData.baseUrl);
         console.log('=== 开始提交工单 ===');
         if (this.data.submitting) {
             console.log('正在提交中，忽略本次提交');
@@ -370,17 +405,18 @@ Page({
                 let imageUrls = [];
                 if (this.data.images.length > 0) {
                     console.log('准备上传图片:', this.data.images);
-                    // TODO: 实现图片上传逻辑
-                    // 这里需要调用文件上传接口
-                    // 暂时使用本地路径
-                    imageUrls = this.data.images;
+                    // 并发上传所有图片，imageUrls 只用后端返回的url
+                    imageUrls = await Promise.all(
+                        this.data.images.map(path => this.uploadSingleImage(path))
+                    );
+                    console.log('上传后的图片URL数组:', imageUrls);
                 }
 
                 // 3. 构造工单数据
                 const orderData = {
                     userOpenid: userInfo.openid,
                     description: this.data.content,
-                    imageUrls: imageUrls.join(','),
+                    imageUrls: imageUrls,
                     address: this.data.location,
                     buildingInfo: this.data.building,
                     status: '未领取',
