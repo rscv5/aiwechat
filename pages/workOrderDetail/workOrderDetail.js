@@ -82,16 +82,16 @@ Page({
     const { index, type } = e.currentTarget.dataset;
     let urls = [];
     if (type === 'workOrder') {
-      urls = this.data.workOrder.imageUrls ? JSON.parse(this.data.workOrder.imageUrls) : [];
+      urls = this.data.workOrder.imageUrls || [];
     } else if (type === 'handled') {
-      urls = this.data.workOrder.handledImages ? JSON.parse(this.data.workOrder.handledImages) : [];
+      urls = this.data.workOrder.handledImages || [];
     } else if (type === 'feedback') {
       const feedback = this.data.workOrder.feedbackList[index];
-      urls = feedback.feedbackImages ? JSON.parse(feedback.feedbackImages) : [];
+      urls = feedback.feedbackImages || [];
     }
     if (urls.length > 0) {
       wx.previewImage({
-        current: urls[0],
+        current: urls[index],
         urls: urls
       });
     }
