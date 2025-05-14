@@ -5,7 +5,7 @@ const checkLogin = () => {
   const token = wx.getStorageSync('auth_token');
   console.log('checkLogin - 当前token:', token);
   if (!token) {
-    console.log('》》》No token found, redirecting to login page');
+    //console.log('》》》No token found, redirecting to login page');
     wx.reLaunch({
       url: '/pages/login/login'
     });
