@@ -2,7 +2,6 @@
   "pages": [
     "pages/index/index",
     "pages/login/login", 
-    "pages/grid/index",
     "pages/admin/index",
     "pages/user/workorder/list",
     "pages/grid/workorder/list",

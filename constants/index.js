@@ -50,7 +50,18 @@ function formatDate(date) {
   
   // 处理字符串日期
   if (typeof date === 'string') {
-    // 将日期字符串转换为 iOS 兼容的格式
+    // 处理 ISO 8601 格式 (2025-05-14T11:26:22)
+    if (date.includes('T')) {
+      var parts = date.split('T');
+      var datePart = parts[0];
+      var timePart = parts[1];
+      
+      var dateParts = datePart.split('-');
+      var timeParts = timePart.split(':');
+      
+      return datePart + ' ' + timePart;
+    }
+    // 将其他日期字符串转换为 iOS 兼容的格式
     date = date.replace(/-/g, '/');
   }
   
