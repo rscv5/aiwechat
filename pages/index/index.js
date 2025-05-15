@@ -157,6 +157,9 @@ Page({
         url: `${app.globalData.baseUrl}/api/upload`,
         filePath,
         name: 'file',
+        formData: {
+            type: 'workorder'
+        },
         header: {
           'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
         },

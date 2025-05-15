@@ -1,11 +1,4 @@
 <view class="detail-container">
-  <!-- 调试信息 -->
-  <view class="debug-info" style="padding: 20rpx; background: #f8f9fa; margin: 20rpx; border-radius: 8rpx;">
-    <text>用户角色: {{userRole}}</text>
-    <text>工单状态: {{workOrder.status}}</text>
-    <text>是否显示操作按钮: {{userRole === '网格员' && workOrder.status === '处理中' ? '是' : '否'}}</text>
-  </view>
-
   <!-- 顶部状态栏 -->
   <view class="status-bar {{workOrder.status === '处理完' ? 'status-completed' : workOrder.status === '已上报' ? 'status-reported' : 'status-processing'}}">
     <view class="status-content">

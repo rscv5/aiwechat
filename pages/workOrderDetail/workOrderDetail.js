@@ -3,6 +3,9 @@ import { workOrderApi } from '../../services/api';
 import { API, formatDate } from '../../constants/index';
 import { userApi } from '../../services/api';
 
+// 添加服务器基础URL配置
+
+
 Page({
   data: {
     workId: null,
@@ -119,12 +122,12 @@ Page({
     const { index, type } = e.currentTarget.dataset;
     let urls = [];
     if (type === 'workOrder') {
-      urls = this.data.workOrder.imageUrls || [];
+      urls = (this.data.workOrder.imageUrls || []).map(url => url.startsWith('http') ? url : `${app.globalData.baseUrl}${url}`);
     } else if (type === 'handled') {
       urls = this.data.handledImages || [];
     } else if (type === 'feedback') {
       const feedback = this.data.workOrder.feedbackList[index];
-      urls = feedback.feedbackImages || [];
+      urls = (feedback.feedbackImages || []).map(url => url.startsWith('http') ? url : `${app.globalData.baseUrl}${url}`);
     }
     if (urls.length > 0) {
       wx.previewImage({
@@ -150,7 +153,7 @@ Page({
     this.setData({ handledDesc: e.detail.value });
   },
 
-  // 上传处理图片（支持相册和相机选择，带日志）
+  // 上传处理图片（选择后立即上传到服务器，handledImages始终为服务器URL）
   async uploadHandledImages() {
     console.log('点击上传图片，当前handledImages:', this.data.handledImages);
     try {
@@ -160,17 +163,22 @@ Page({
         sourceType: ['album', 'camera']
       });
       console.log('选择图片结果:', res);
+      wx.showLoading({ title: '上传中...' });
+      // 立即上传到服务器
+      const uploadedUrls = await this.uploadImagesToServer(res.tempFilePaths);
       this.setData({
-        handledImages: [...this.data.handledImages, ...res.tempFilePaths]
+        handledImages: [...this.data.handledImages, ...uploadedUrls]
       }, () => {
-        console.log('图片已添加，handledImages:', this.data.handledImages);
+        console.log('图片已上传，handledImages:', this.data.handledImages);
       });
     } catch (err) {
-      console.error('选择图片失败:', err);
+      console.error('选择或上传图片失败:', err);
       wx.showToast({
-        title: '选择图片失败',
+        title: '选择或上传图片失败',
         icon: 'none'
       });
+    } finally {
+      wx.hideLoading();
     }
   },
 
@@ -192,10 +200,12 @@ Page({
       console.log('准备上传图片到服务器:', filePath);
       await new Promise((resolve, reject) => {
         wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`, // 本地后端图片上传接口
+          url: `${app.globalData.baseUrl}/api/upload`,
           filePath,
           name: 'file',
-          formData: { type: 'workorder' },
+          formData: {
+            type: 'feedback'
+          },
           header: {
             'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
           },
@@ -204,13 +214,16 @@ Page({
               const data = JSON.parse(res.data);
               console.log('图片上传响应:', data);
               if (data.url) {
-                uploadedUrls.push(data.url);
+                // 确保返回完整的URL
+                const fullUrl = data.url.startsWith('http') ? data.url : `${app.globalData.baseUrl}${data.url}`;
+                uploadedUrls.push(fullUrl);
                 resolve();
               } else {
                 wx.showToast({ title: '图片上传失败', icon: 'none' });
                 reject();
               }
             } catch (e) {
+              console.error('解析响应失败:', e);
               wx.showToast({ title: '图片上传失败', icon: 'none' });
               reject();
             }
@@ -227,7 +240,7 @@ Page({
     return uploadedUrls;
   },
 
-  // 提交反馈（先上传图片再提交，带日志）
+  // 提交反馈（handledImages已为服务器URL，直接提交）
   async submitFeedback() {
     console.log('点击提交反馈，handledDesc:', this.data.handledDesc, 'handledImages:', this.data.handledImages);
     if (!this.data.handledDesc.trim()) {
@@ -237,28 +250,13 @@ Page({
       });
       return;
     }
-
     try {
       wx.showLoading({ title: '提交中...' });
-
-      // 1. 上传所有本地图片到服务器
-      let handledImages = this.data.handledImages;
-      const localImages = handledImages.filter(img => !/^https?:\/\//.test(img));
-      let uploadedUrls = [];
-      if (localImages.length > 0) {
-        uploadedUrls = await this.uploadImagesToServer(localImages);
-      }
-      const allImageUrls = [
-        ...handledImages.filter(img => /^https?:\/\//.test(img)),
-        ...uploadedUrls
-      ];
-      console.log('最终提交的图片URL:', allImageUrls);
-
-      // 2. 提交反馈
+      // handledImages已为服务器URL，直接提交
       const res = await require('../../services/api').submitFeedback({
         workId: this.data.workOrder.workId,
         handledDesc: this.data.handledDesc,
-        handledImages: allImageUrls
+        handledImages: this.data.handledImages
       });
       console.log('提交反馈接口响应:', res);
       if (res.statusCode === 200 && res.data && res.data.code === 200) {
@@ -267,7 +265,7 @@ Page({
           icon: 'success'
         });
         this.hideFeedbackModal();
-        this.setData({ handledImages: [] });
+        this.setData({ handledImages: [] }); // 清空图片
         this.loadWorkOrderDetail();
       } else {
         throw new Error(res.data?.msg || '提交失败');

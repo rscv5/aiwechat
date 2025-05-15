@@ -176,6 +176,9 @@ Page({
                 url: `${app.globalData.baseUrl}/api/upload`,
                 filePath,
                 name: 'file',
+                formData: {
+                    type: 'workorder'
+                },
                 header: {
                     'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
                 },
@@ -184,10 +187,8 @@ Page({
                     try {
                         const data = JSON.parse(res.data);
                         if (data.code === 200 && data.url) {
-                            // 只返回后端返回的图片访问URL
                             resolve(data.url);
                         } else if (data.url) {
-                            // 兼容后端只返回url的情况
                             resolve(data.url);
                         } else {
                             reject(new Error(data.message || '上传失败'));
