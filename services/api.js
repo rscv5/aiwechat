@@ -193,3 +193,34 @@ export const userApi = {
     return response.token;
   }
 } 
+
+// 网格员相关接口
+
+/**
+ * 网格员提交工单反馈
+ * @param {Object} params
+ * @param {number} params.workId 工单ID
+ * @param {string} params.handledDesc 处理说明
+ * @param {Array<string>} params.handledImages 处理图片URL数组
+ * @returns Promise
+ */
+export function submitFeedback({ workId, handledDesc, handledImages }) {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: 'http://127.0.0.1:8080/api/gridworker/feedback', // 本地SpringBoot后端接口
+      method: 'POST',
+      header: {
+        'Authorization': 'Bearer ' + wx.getStorageSync('auth_token'),
+        'Content-Type': 'application/json'
+      },
+      data: {
+        workId,
+        handledDesc,
+        handledImages
+      },
+      success: resolve,
+      fail: reject
+    });
+  });
+}
+

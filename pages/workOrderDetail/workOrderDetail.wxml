@@ -140,7 +140,6 @@
             </block>
           </view>
           <button class="upload-btn" bindtap="uploadHandledImages" wx:if="{{handledImages.length < 9}}">
-            <image src="../../assets/icons/camera.png" mode="aspectFit" />
             <text>上传图片</text>
           </button>
         </view>

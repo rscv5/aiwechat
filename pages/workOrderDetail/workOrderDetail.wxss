@@ -371,10 +371,10 @@
 }
 
 .upload-btn {
-  width: 160rpx;
-  height: 160rpx;
-  background: #f8f9fa;
-  border: 2rpx dashed #ddd;
+  width: 100rpx;
+  height: 50rpx;
+  background: #e8e6df;
+  border: 2rpx dashed #e3dede;
   border-radius: 12rpx;
   display: flex;
   flex-direction: column;
@@ -391,7 +391,7 @@
 
 .upload-btn text {
   font-size: 24rpx;
-  color: #999;
+  color: #798181;
 }
 
 .modal-footer {

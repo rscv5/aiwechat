@@ -1,4 +1,3 @@
-// pages/quickPhoto/quickPhoto.js
 const app = getApp();
 import { API, formatDate } from '../../constants/index';
 

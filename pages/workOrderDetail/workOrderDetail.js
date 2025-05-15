@@ -1,5 +1,6 @@
+const app = getApp();
 import { workOrderApi } from '../../services/api';
-import { formatDate } from '../../constants/index';
+import { API, formatDate } from '../../constants/index';
 import { userApi } from '../../services/api';
 
 Page({
@@ -149,47 +150,86 @@ Page({
     this.setData({ handledDesc: e.detail.value });
   },
 
-  // 上传处理图片
+  // 上传处理图片（支持相册和相机选择，带日志）
   async uploadHandledImages() {
+    console.log('点击上传图片，当前handledImages:', this.data.handledImages);
     try {
       const res = await wx.chooseImage({
         count: 9 - this.data.handledImages.length,
         sizeType: ['compressed'],
         sourceType: ['album', 'camera']
       });
-
-      const tempFilePaths = res.tempFilePaths;
-      const uploadedImages = [];
-
-      for (let path of tempFilePaths) {
-        const uploadRes = await wx.cloud.uploadFile({
-          cloudPath: `workOrder/${Date.now()}-${Math.random().toString(36).substr(2)}.${path.match(/\.(\w+)$/)[1]}`,
-          filePath: path
-        });
-        uploadedImages.push(uploadRes.fileID);
-      }
-
+      console.log('选择图片结果:', res);
       this.setData({
-        handledImages: [...this.data.handledImages, ...uploadedImages]
+        handledImages: [...this.data.handledImages, ...res.tempFilePaths]
+      }, () => {
+        console.log('图片已添加，handledImages:', this.data.handledImages);
       });
     } catch (err) {
+      console.error('选择图片失败:', err);
       wx.showToast({
-        title: '上传失败，请重试',
+        title: '选择图片失败',
         icon: 'none'
       });
     }
   },
 
-  // 删除已上传图片
+  // 删除处理图片（带日志）
   deleteImage(e) {
-    const { index } = e.currentTarget.dataset;
-    const images = [...this.data.handledImages];
-    images.splice(index, 1);
-    this.setData({ handledImages: images });
+    const index = e.currentTarget.dataset.index;
+    console.log('点击删除图片，index:', index, '当前handledImages:', this.data.handledImages);
+    const handledImages = [...this.data.handledImages];
+    handledImages.splice(index, 1);
+    this.setData({ handledImages }, () => {
+      console.log('图片已删除，handledImages:', this.data.handledImages);
+    });
   },
 
-  // 提交反馈
+  // 批量上传本地图片到服务器，返回图片URL数组（带日志）
+  async uploadImagesToServer(localImagePaths) {
+    const uploadedUrls = [];
+    for (let filePath of localImagePaths) {
+      console.log('准备上传图片到服务器:', filePath);
+      await new Promise((resolve, reject) => {
+        wx.uploadFile({
+          url: `${app.globalData.baseUrl}/api/upload`, // 本地后端图片上传接口
+          filePath,
+          name: 'file',
+          formData: { type: 'workorder' },
+          header: {
+            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
+          },
+          success: (res) => {
+            try {
+              const data = JSON.parse(res.data);
+              console.log('图片上传响应:', data);
+              if (data.url) {
+                uploadedUrls.push(data.url);
+                resolve();
+              } else {
+                wx.showToast({ title: '图片上传失败', icon: 'none' });
+                reject();
+              }
+            } catch (e) {
+              wx.showToast({ title: '图片上传失败', icon: 'none' });
+              reject();
+            }
+          },
+          fail: (err) => {
+            console.error('图片上传失败:', err);
+            wx.showToast({ title: '图片上传失败', icon: 'none' });
+            reject(err);
+          }
+        });
+      });
+    }
+    console.log('所有图片上传完成，服务器URL:', uploadedUrls);
+    return uploadedUrls;
+  },
+
+  // 提交反馈（先上传图片再提交，带日志）
   async submitFeedback() {
+    console.log('点击提交反馈，handledDesc:', this.data.handledDesc, 'handledImages:', this.data.handledImages);
     if (!this.data.handledDesc.trim()) {
       wx.showToast({
         title: '请输入处理说明',
@@ -200,27 +240,40 @@ Page({
 
     try {
       wx.showLoading({ title: '提交中...' });
-      
-      const res = await wx.cloud.callFunction({
-        name: 'submitWorkOrderFeedback',
-        data: {
-          workId: this.data.workOrder.workId,
-          description: this.data.handledDesc,
-          images: this.data.handledImages
-        }
-      });
 
-      if (res.result.success) {
+      // 1. 上传所有本地图片到服务器
+      let handledImages = this.data.handledImages;
+      const localImages = handledImages.filter(img => !/^https?:\/\//.test(img));
+      let uploadedUrls = [];
+      if (localImages.length > 0) {
+        uploadedUrls = await this.uploadImagesToServer(localImages);
+      }
+      const allImageUrls = [
+        ...handledImages.filter(img => /^https?:\/\//.test(img)),
+        ...uploadedUrls
+      ];
+      console.log('最终提交的图片URL:', allImageUrls);
+
+      // 2. 提交反馈
+      const res = await require('../../services/api').submitFeedback({
+        workId: this.data.workOrder.workId,
+        handledDesc: this.data.handledDesc,
+        handledImages: allImageUrls
+      });
+      console.log('提交反馈接口响应:', res);
+      if (res.statusCode === 200 && res.data && res.data.code === 200) {
         wx.showToast({
           title: '提交成功',
           icon: 'success'
         });
         this.hideFeedbackModal();
+        this.setData({ handledImages: [] });
         this.loadWorkOrderDetail();
       } else {
-        throw new Error(res.result.message || '提交失败');
+        throw new Error(res.data?.msg || '提交失败');
       }
     } catch (err) {
+      console.error('提交反馈失败:', err);
       wx.showToast({
         title: err.message || '提交失败，请重试',
         icon: 'none'
