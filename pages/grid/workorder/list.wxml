@@ -30,7 +30,7 @@
         <view class="order-item" wx:for="{{orders}}" wx:key="workId" bindtap="goToDetail" data-id="{{item.workId}}">
             <view class="order-header">
                 <text class="order-id">工单号：{{item.workId}}</text>
-                <text class="order-status {{item.status === '未领取' ? 'status-unclaimed' : ''}}">{{item.status}}</text>
+                <text class="order-status status-{{item.statusEn}}">{{item.statusCn}}</text>
             </view>
             
             <view class="order-content">

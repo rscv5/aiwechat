@@ -293,30 +293,46 @@ Page({
 
       if (res.confirm) {
         wx.showLoading({ title: '上报中...' });
-        
-        const reportRes = await wx.cloud.callFunction({
-          name: 'reportToCaptain',
+        wx.request({
+          url: `${app.globalData.baseUrl}/api/gridworker/report-to-captain`,
+          method: 'POST',
+          header: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
+          },
           data: {
             workId: this.data.workOrder.workId
+          },
+          success: (reportRes) => {
+            if (reportRes.statusCode === 200 && reportRes.data && reportRes.data.code === 200) {
+              wx.showToast({
+                title: '上报成功',
+                icon: 'success'
+              });
+              this.loadWorkOrderDetail();
+            } else {
+              wx.showToast({
+                title: reportRes.data?.msg || '上报失败',
+                icon: 'none'
+              });
+            }
+          },
+          fail: (err) => {
+            wx.showToast({
+              title: err.errMsg || '上报失败，请重试',
+              icon: 'none'
+            });
+          },
+          complete: () => {
+            wx.hideLoading();
           }
         });
-
-        if (reportRes.result.success) {
-          wx.showToast({
-            title: '上报成功',
-            icon: 'success'
-          });
-          this.loadWorkOrderDetail();
-        } else {
-          throw new Error(reportRes.result.message || '上报失败');
-        }
       }
     } catch (err) {
       wx.showToast({
         title: err.message || '上报失败，请重试',
         icon: 'none'
       });
-    } finally {
       wx.hideLoading();
     }
   },

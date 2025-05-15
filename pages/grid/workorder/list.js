@@ -11,7 +11,23 @@ Page({
         orders: [],
         isLoading: true,
         error: null,
-        activeTab: 'today' // 默认显示今日工单
+        activeTab: 'today', // 默认显示今日工单
+        statusMap: {
+          unclaimed: '未领取',
+          processing: '处理中',
+          reported: '已上报',
+          completed: '处理完'
+        },
+        statusEnMap: {
+          '未领取': 'unclaimed',
+          '处理中': 'processing',
+          '已上报': 'reported',
+          '处理完': 'completed',
+          'unclaimed': 'unclaimed',
+          'processing': 'processing',
+          'reported': 'reported',
+          'completed': 'completed'
+        }
     },
 
     /**
@@ -94,17 +110,35 @@ Page({
             
             if (res && res.code === 200) {
                 console.log('原始工单数据:', res.data);
-                // 格式化时间
+                // 格式化时间和状态映射
                 const orders = res.data.map(order => {
-                    console.log('格式化前的时间:', order.createdAt);
-                    const formattedDate = formatDate(order.createdAt);
-                    console.log('格式化后的时间:', formattedDate);
+                    // 强制映射英文状态
+                    let statusEn = this.data.statusEnMap[order.status] || 'unclaimed';
+                    let statusCn = this.data.statusMap[statusEn] || order.status;
                     return {
                         ...order,
-                        createdAt: formattedDate
+                        createdAt: formatDate(order.createdAt),
+                        updatedAt: order.updatedAt ? formatDate(order.updatedAt) : '',
+                        statusEn,
+                        statusCn
                     };
                 });
-                
+                // 排序逻辑用英文
+                orders.sort((a, b) => {
+                    // 未领取排最前
+                    if (a.statusEn === 'unclaimed' && b.statusEn !== 'unclaimed') return -1;
+                    if (a.statusEn !== 'unclaimed' && b.statusEn === 'unclaimed') return 1;
+                    // 处理完排最后
+                    if (a.statusEn === 'completed' && b.statusEn !== 'completed') return 1;
+                    if (a.statusEn !== 'completed' && b.statusEn === 'completed') return -1;
+                    // 处理中/已上报按 updatedAt 降序
+                    if (a.statusEn === b.statusEn) {
+                        const aTime = new Date(a.updatedAt || a.createdAt).getTime();
+                        const bTime = new Date(b.updatedAt || b.createdAt).getTime();
+                        return bTime - aTime;
+                    }
+                    return 0;
+                });
                 console.log('处理后的工单数据:', orders);
                 this.setData({ orders });
             } else {

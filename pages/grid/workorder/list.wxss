@@ -70,16 +70,34 @@
 }
 
 .order-status {
-    font-size: 24rpx;
-    padding: 4rpx 12rpx;
+    display: inline-block;
+    padding: 4rpx 18rpx;
     border-radius: 20rpx;
-    background: #f0f0f0;
-    color: #666;
+    font-size: 24rpx;
+    font-weight: bold;
+    margin-left: 16rpx;
+    margin-top: 2rpx;
+    vertical-align: middle;
 }
 
-.status-unclaimed {
+.order-status.status-unclaimed {
     background: #fff7e6;
     color: #fa8c16;
+}
+
+.order-status.status-processing {
+    background: #e6f7ff;
+    color: #1890ff;
+}
+
+.order-status.status-reported {
+    background: #f3e6ff;
+    color: #722ed1;
+}
+
+.order-status.status-completed {
+    background: #f6ffed;
+    color: #52c41a;
 }
 
 .order-content {
@@ -119,12 +137,19 @@
     text-align: center;
 }
 
+.claim-btn {
+    background: #07c160;
+    color: #fff;
+}
+
 .process-btn {
     background: #1890ff;
+    color: #fff;
 }
 
 .view-btn {
     background: #52c41a;
+    color: #fff;
 }
 
 /* 加载中样式 */
