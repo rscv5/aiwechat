@@ -1,8 +1,17 @@
 <view class="detail-container">
-  <!-- 主标题 -->
-  <view class="main-title">
-    工单详情
-    <view class="main-title-underline"></view>
+  <!-- 调试信息 -->
+  <view class="debug-info" style="padding: 20rpx; background: #f8f9fa; margin: 20rpx; border-radius: 8rpx;">
+    <text>用户角色: {{userRole}}</text>
+    <text>工单状态: {{workOrder.status}}</text>
+    <text>是否显示操作按钮: {{userRole === '网格员' && workOrder.status === '处理中' ? '是' : '否'}}</text>
+  </view>
+
+  <!-- 顶部状态栏 -->
+  <view class="status-bar {{workOrder.status === '处理完' ? 'status-completed' : workOrder.status === '已上报' ? 'status-reported' : 'status-processing'}}">
+    <view class="status-content">
+      <text class="status-text">{{workOrder.status || '未知状态'}}</text>
+      <text class="order-id">工单号：{{workOrder.workId}}</text>
+    </view>
   </view>
 
   <!-- 加载状态 -->
@@ -18,116 +27,127 @@
     <button class="retry-btn" bindtap="loadWorkOrderDetail">重试</button>
   </view>
 
-  <!-- 顶部状态卡片 -->
-  <view class="order-header" wx:if="{{workOrder}}">
-    <view class="order-status-tag {{statusClass}}">
-      {{workOrder.status || '未知状态'}}
-    </view>
-    <view class="order-info">
-      <text>工单编号：{{workOrder.workId}}</text>
-    </view>
-  </view>
-
-  <!-- 工单详情 -->
   <block wx:if="{{workOrder}}">
     <!-- 工单基本信息 -->
     <view class="info-card">
-      <view class="info-tag">
-        <image class="info-icon" src="../../assets/icons/building.png" mode="aspectFit" />
-        <text>楼栋</text>
-        <text class="info-value">{{workOrder.buildingInfo}}</text>
+      <view class="info-section">
+        <view class="info-item">
+          <image class="info-icon" src="../../assets/icons/building.png" mode="aspectFit" />
+          <text class="info-label">楼栋</text>
+          <text class="info-value">{{workOrder.buildingInfo}}</text>
+        </view>
+        <view class="info-item">
+          <image class="info-icon" src="../../assets/icons/location.png" mode="aspectFit" />
+          <text class="info-label">地址</text>
+          <text class="info-value">{{workOrder.address || '未提供'}}</text>
+        </view>
+        <view class="info-item">
+          <image class="info-icon" src="../../assets/icons/phone.png" mode="aspectFit" />
+          <text class="info-label">联系电话</text>
+          <text class="info-value">{{workOrder.submitterPhone || '未提供'}}</text>
+        </view>
       </view>
-      <view class="info-tag">
-        <image class="info-icon" src="../../assets/icons/phone.png" mode="aspectFit" />
-        <text>联系电话</text>
-        <text class="info-value">{{workOrder.submitterPhone || '未提供'}}</text>
-      </view>
-      <view class="info-tag">
-        <image class="info-icon" src="../../assets/icons/desc.png" mode="aspectFit" />
-        <text>问题描述</text>
-        <text class="info-value">{{workOrder.description}}</text>
-      </view>
-      <view class="info-tag">
-        <image class="info-icon" src="../../assets/icons/location.png" mode="aspectFit" />
-        <text>地址</text>
-        <text class="info-value">{{workOrder.address || '未提供'}}</text>
+      
+      <view class="description-section">
+        <text class="section-title">问题描述</text>
+        <text class="description-text">{{workOrder.description}}</text>
       </view>
     </view>
 
-    <!-- 工单图片 -->
-    <view class="image-card">
-      <text class="card-title">问题图片</text>
-      <block wx:if="{{workOrder.imageUrls}}">
-        <scroll-view class="image-scroll" scroll-x enable-flex>
-          <block wx:for="{{workOrder.imageUrls}}" wx:key="index">
+    <!-- 问题图片区域 -->
+    <view class="image-section">
+      <text class="section-title">问题图片</text>
+      <scroll-view class="image-scroll" scroll-x enable-flex wx:if="{{workOrder.imageUrls && workOrder.imageUrls.length > 0}}">
+        <block wx:for="{{workOrder.imageUrls}}" wx:key="index">
+          <view class="image-wrapper">
             <image
-              class="order-image"
+              class="problem-image"
               src="{{item}}"
               mode="aspectFill"
               bindtap="previewImage"
               data-type="workOrder"
               data-index="{{index}}"
             />
-          </block>
-        </scroll-view>
-      </block>
-      <block wx:else>
-        <view class="image-placeholder">
-          <image src="../../assets/icons/no-image.png" class="placeholder-icon" mode="aspectFit" />
-          <text class="placeholder-text">暂无图片</text>
-        </view>
-      </block>
+          </view>
+        </block>
+      </scroll-view>
+      <view wx:else class="no-image">
+        <image src="../../assets/icons/no-image.png" mode="aspectFit" />
+        <text>暂无图片</text>
+      </view>
     </view>
 
-    <!-- 时间线操作记录 -->
-    <view class="process-record" wx:if="{{workOrder.processingLogs && workOrder.processingLogs.length}}">
-      <text class="card-title">操作记录</text>
+    <!-- 处理记录时间线 -->
+    <view class="timeline-section" wx:if="{{workOrder.processingLogs && workOrder.processingLogs.length}}">
+      <text class="section-title">处理记录</text>
       <view class="timeline">
         <block wx:for="{{workOrder.processingLogs}}" wx:key="workId">
-          <view class="timeline-item">
-            <view class="timeline-dot">
-              <image class="timeline-icon" src="{{getProcessIcon(item.actionType || item.status)}}" mode="aspectFit" />
-            </view>
+          <view class="timeline-item {{index === workOrder.processingLogs.length - 1 ? 'latest' : ''}}">
+            <view class="timeline-dot"></view>
             <view class="timeline-content">
-              <view class="timeline-row">
-                <text class="description">{{item.actionDescription}}</text>
-                <text class="timeline-time-label">{{item.createdAt || item.updatedAt || 'no time'}}</text>
-              </view>
+              <text class="timeline-action">{{item.actionDescription}}</text>
+              <text class="timeline-time">{{item.createdAt || item.updatedAt || '未知时间'}}</text>
             </view>
           </view>
         </block>
       </view>
     </view>
-
-    <!-- 反馈信息 -->
-    <view class="feedback-card" wx:if="{{workOrder.feedbackList.length > 0}}">
-      <text class="card-title">反馈信息</text>
-      <view class="feedback-list">
-        <view class="feedback-item" wx:for="{{workOrder.feedbackList}}" wx:key="feedbackId">
-          <view class="feedback-header">
-            <text class="handler">{{item.handlerRole}}</text>
-            <text class="time">{{item.feedbackTime}}</text>
-          </view>
-          <text class="description">{{item.feedbackDescription}}</text>
-          <scroll-view class="image-scroll" scroll-x enable-flex wx:if="{{item.feedbackImages}}">
-            <block wx:for="{{item.feedbackImages}}" wx:key="index">
-              <image
-                class="feedback-image"
-                src="{{item}}"
-                mode="aspectFill"
-                bindtap="previewImage"
-                data-type="feedback"
-                data-index="{{index}}"
-              />
-            </block>
-          </scroll-view>
-        </view>
-      </view>
-    </view>
   </block>
 
-  <!-- 返回按钮 -->
+  <!-- 底部操作栏 -->
   <view class="footer-bar">
+    <block wx:if="{{userRole === '网格员' && (workOrder.status === '处理中' || workOrder.status === 'processing')}}">
+      <button class="action-btn feedback-btn" bindtap="showFeedbackModal">
+        <text>工单反馈</text>
+      </button>
+      <button class="action-btn report-btn" bindtap="reportToCaptain">
+        <text>上报工单</text>
+      </button>
+    </block>
     <button class="back-btn" bindtap="goBack">返回</button>
+  </view>
+
+  <!-- 反馈弹窗 -->
+  <view class="feedback-modal {{showFeedbackModal ? 'show' : ''}}" wx:if="{{userRole === '网格员'}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">工单反馈</text>
+        <image class="close-icon" src="../../assets/icons/close.png" bindtap="hideFeedbackModal" />
+      </view>
+      <view class="modal-body">
+        <textarea
+          class="feedback-input"
+          placeholder="请输入处理说明..."
+          bindinput="onHandledDescInput"
+          value="{{handledDesc}}"
+          maxlength="500"
+        />
+        <view class="char-count">{{handledDesc.length || 0}}/500</view>
+        <view class="image-upload">
+          <view class="upload-preview" wx:if="{{handledImages.length > 0}}">
+            <block wx:for="{{handledImages}}" wx:key="index">
+              <view class="preview-item">
+                <image
+                  class="preview-image"
+                  src="{{item}}"
+                  mode="aspectFill"
+                  bindtap="previewImage"
+                  data-type="handled"
+                  data-index="{{index}}"
+                />
+                <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+              </view>
+            </block>
+          </view>
+          <button class="upload-btn" bindtap="uploadHandledImages" wx:if="{{handledImages.length < 9}}">
+            <image src="../../assets/icons/camera.png" mode="aspectFit" />
+            <text>上传图片</text>
+          </button>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
+      </view>
+    </view>
   </view>
 </view> 

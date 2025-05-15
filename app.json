@@ -5,7 +5,6 @@
     "pages/admin/index",
     "pages/user/workorder/list",
     "pages/grid/workorder/list",
-    "pages/grid/workorder/detail",
     "pages/admin/workorder/list",
     "pages/quickPhoto/quickPhoto",
     "pages/workOrderDetail/workOrderDetail"

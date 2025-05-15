@@ -155,7 +155,7 @@ Page({
     handleProcess(e) {
         const { id } = e.currentTarget.dataset;
         wx.navigateTo({
-            url: `/pages/grid/workorder/detail?id=${id}`
+            url: `/pages/workOrderDetail/workOrderDetail?id=${id}`
         });
     },
 
@@ -163,7 +163,7 @@ Page({
     goToDetail(e) {
         const { id } = e.currentTarget.dataset;
         wx.navigateTo({
-            url: `/pages/grid/workorder/detail?id=${id}`
+            url: `/pages/workOrderDetail/workOrderDetail?id=${id}`
         });
     }
 })
