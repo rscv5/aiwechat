@@ -64,7 +64,13 @@
 
             <!-- 我的工单的处理按钮 -->
             <view class="order-footer" wx:if="{{activeTab === 'my'}}">
-                <button class="process-btn" catchtap="handleProcess" data-id="{{item.workId}}">处理工单</button>
+                <button 
+                    class="{{item.status === '处理完' ? 'view-btn' : 'process-btn'}}" 
+                    catchtap="{{item.status === '处理完' ? 'goToDetail' : 'handleProcess'}}" 
+                    data-id="{{item.workId}}"
+                >
+                    {{item.status === '处理完' ? '查看工单' : '处理工单'}}
+                </button>
             </view>
         </view>
     </view>

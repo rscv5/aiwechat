@@ -16,7 +16,8 @@ Page({
     handledDesc: '',
     handledImages: [],
     userRole: '',
-    showFeedbackModal: false
+    showFeedbackModal: false,
+    showResultModal: false
   },
 
   onLoad(options) {
@@ -326,6 +327,20 @@ Page({
       delta: 1,
       animationType: 'slide-out-right',
       animationDuration: 300
+    });
+  },
+
+  // 显示处理结果弹窗
+  showResultModal() {
+    this.setData({
+      showResultModal: true
+    });
+  },
+
+  // 隐藏处理结果弹窗
+  hideResultModal() {
+    this.setData({
+      showResultModal: false
     });
   }
 }); 
