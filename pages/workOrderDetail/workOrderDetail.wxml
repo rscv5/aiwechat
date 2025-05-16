@@ -14,10 +14,10 @@
   </view>
 
   <!-- 错误提示 -->
-  <view wx:elif="{{error}}" class="error">
-    <image src="/assets/icons/error.png" mode="aspectFit"></image>
+  <view class="error" wx:if="{{error}}">
+    <image class="error-icon" src="../../assets/icons/empty.png" />
     <text>{{error}}</text>
-    <button class="retry-btn" bindtap="loadWorkOrderDetail">重试</button>
+    <button class="retry-btn" bindtap="loadGridWorkers">重试</button>
   </view>
 
   <block wx:if="{{workOrder}}">
@@ -137,6 +137,8 @@
         <text>上报工单</text>
       </button>
     </block>
+    <!-- 片区长分配工单按钮 -->
+    <button wx:if="{{canAssign}}" class="action-btn assign-btn" bindtap="openAssignModal">分配工单</button>
     <button class="back-btn" bindtap="goBack">返回</button>
   </view>
 
@@ -179,6 +181,44 @@
       </view>
       <view class="modal-footer">
         <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分配工单弹窗 -->
+  <view wx:if="{{showAssignModal}}" class="assign-modal">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">分配工单</text>
+        <image class="close-icon" src="../../assets/icons/close.png" bindtap="closeAssignModal" />
+      </view>
+      <view class="modal-body">
+        <view class="form-group">
+          <view class="form-label">选择网格员</view>
+          <picker range="{{gridWorkers}}" range-key="username" bindchange="onWorkerChange">
+            <view class="form-picker">
+              <text class="{{selectedWorker ? 'picker-value' : 'picker-placeholder'}}">
+                {{selectedWorker ? selectedWorker.username : '请选择网格员'}}
+              </text>
+              <image class="picker-arrow" src="../../assets/icons/arrow-down.png" />
+            </view>
+          </picker>
+        </view>
+        <view class="form-group">
+          <view class="form-label">截止时间（可选）</view>
+          <picker mode="date" value="{{assignDeadline}}" bindchange="onDeadlineChange">
+            <view class="form-picker">
+              <text class="{{assignDeadline ? 'picker-value' : 'picker-placeholder'}}">
+                {{assignDeadline || '请选择截止时间'}}
+              </text>
+              <image class="picker-arrow" src="../../assets/icons/arrow-down.png" />
+            </view>
+          </picker>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="submit-btn" bindtap="submitAssign">确认分配</button>
+        <button class="cancel-btn" bindtap="closeAssignModal">取消</button>
       </view>
     </view>
   </view>

@@ -57,11 +57,11 @@ const permission = {
     const role = authService.getUserRole();
     switch (role) {
       case '网格员':
-        return '/pages/grid/index';
+        return '/pages/grid/workorder/list';
       case '片区长':
-        return '/pages/admin/index';
+        return '/pages/captain/workorder/list';
       default:
-        return '/pages/user/index';
+        return '/pages/user/workorder/list';
     }
   }
 };

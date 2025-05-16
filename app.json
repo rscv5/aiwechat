@@ -2,12 +2,12 @@
   "pages": [
     "pages/index/index",
     "pages/login/login", 
-    "pages/admin/index",
     "pages/user/workorder/list",
     "pages/grid/workorder/list",
-    "pages/admin/workorder/list",
     "pages/quickPhoto/quickPhoto",
-    "pages/workOrderDetail/workOrderDetail"
+    "pages/workOrderDetail/workOrderDetail",
+    "pages/captain/workorder/list",
+    "pages/captain/workorder/reassign"
   ],
   "window": {
     "backgroundTextStyle": "light",

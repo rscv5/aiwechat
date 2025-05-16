@@ -28,12 +28,12 @@ const redirectToWorkorder = () => {
   switch (role) {
     case '网格员':
       wx.reLaunch({
-        url: '/pages/grid/workorder/create'
+        url: '/pages/grid/workorder/list'
       });
       break;
     case '片区长':
       wx.reLaunch({
-        url: '/pages/admin/workorder/create'
+        url: '/pages/captain/workorder/list'
       });
       break;
     default:
@@ -54,7 +54,7 @@ const redirectByRole = (role) => {
       break;
     case '片区长':
       wx.reLaunch({
-        url: '/pages/admin/workorder/list'
+        url: '/pages/captain/workorder/list'
       });
       break;
     default:

@@ -17,7 +17,14 @@ Page({
     handledImages: [],
     userRole: '',
     showFeedbackModal: false,
-    showResultModal: false
+    showResultModal: false,
+    showAssignModal: false,
+    gridWorkers: [],
+    selectedWorker: null,
+    assignDeadline: '',
+    canAssign: false,
+    userRoleLoaded: false,
+    workOrderLoaded: false
   },
 
   onLoad(options) {
@@ -42,10 +49,10 @@ Page({
       const res = await userApi.getUserInfo(token);
       console.log('getUserRole res:', res);
       const role = res.role || (res.data && res.data.role) || '';
-      this.setData({ userRole: (role || '').trim() });
-      console.log('userRole set:', (role || '').trim());
+      this.setData({ userRole: (role || '').trim(), userRoleLoaded: true }, this.checkCanAssign);
     } catch (error) {
       console.error('获取用户角色失败', error);
+      this.setData({ userRoleLoaded: true }, this.checkCanAssign);
     }
   },
 
@@ -103,18 +110,32 @@ Page({
 
         this.setData({
           workOrder,
-          statusClass: statusClassMap[workOrder.status] || 'pending'
-        });
+          statusClass: statusClassMap[workOrder.status] || 'pending',
+          workOrderLoaded: true
+        }, this.checkCanAssign);
         console.log('workOrder.status:', workOrder.status);
       } else {
         throw new Error(res?.message || '获取工单详情失败');
       }
     } catch (error) {
       this.setData({ 
-        error: error.message || '获取工单详情失败，请稍后重试'
-      });
+        error: error.message || '获取工单详情失败，请稍后重试',
+        workOrderLoaded: true
+      }, this.checkCanAssign);
     } finally {
       this.setData({ isLoading: false });
+    }
+  },
+
+  checkCanAssign() {
+    if (this.data.userRoleLoaded && this.data.workOrderLoaded) {
+      const canAssign = this.data.userRole === '片区长'
+        && this.data.workOrder
+        && (this.data.workOrder.status === '未领取' || this.data.workOrder.status === '已上报');
+      this.setData({ canAssign });
+      if (canAssign) {
+        this.loadGridWorkers();
+      }
     }
   },
 
@@ -358,5 +379,102 @@ Page({
     this.setData({
       showResultModal: false
     });
+  },
+
+  async loadGridWorkers() {
+    try {
+      const res = await new Promise((resolve, reject) => {
+        wx.request({
+          url: `${app.globalData.baseUrl}/api/captain/grid-workers`,
+          method: 'GET',
+          header: {
+            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
+          },
+          success: (res) => resolve(res),
+          fail: (err) => reject(err)
+        });
+      });
+      
+      console.log('获取网格员响应:', res);
+      
+      if (res.statusCode === 200 && res.data && res.data.code === 200) {
+        const gridWorkers = res.data.data || [];
+        if (Array.isArray(gridWorkers)) {
+          this.setData({ 
+            gridWorkers,
+            error: null
+          });
+          console.log('设置网格员数据:', gridWorkers);
+        } else {
+          throw new Error('网格员数据格式错误');
+        }
+      } else {
+        throw new Error(res.data?.message || '获取网格员失败');
+      }
+    } catch (e) {
+      console.error('获取网格员失败:', e);
+      this.setData({ 
+        error: e.message || '获取网格员失败，请稍后重试',
+        gridWorkers: []
+      });
+      wx.showToast({ 
+        title: e.message || '获取网格员失败', 
+        icon: 'none',
+        duration: 2000
+      });
+    }
+  },
+
+  // 分配工单弹窗相关方法
+  openAssignModal() {
+    this.setData({ showAssignModal: true });
+  },
+  closeAssignModal() {
+    this.setData({ showAssignModal: false });
+  },
+  onWorkerChange(e) {
+    const idx = e.detail.value;
+    this.setData({ selectedWorker: this.data.gridWorkers[idx] });
+  },
+  onDeadlineChange(e) {
+    this.setData({ assignDeadline: e.detail.value });
+  },
+  async submitAssign() {
+    if (!this.data.selectedWorker) {
+      wx.showToast({ title: '请选择网格员', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '分配中...' });
+    try {
+      const res = await new Promise((resolve, reject) => {
+        wx.request({
+          url: `${app.globalData.baseUrl}/api/captain/reassign`,
+          method: 'POST',
+          header: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
+          },
+          data: {
+            workId: this.data.workOrder.workId,
+            gridWorkerOpenid: this.data.selectedWorker.openid,
+            deadline: this.data.assignDeadline
+          },
+          success: resolve,
+          fail: reject
+        });
+      });
+      console.log('分配工单接口响应:', res);
+      if (res.statusCode === 200 && res.data && res.data.code === 200) {
+        wx.showToast({ title: '分配成功', icon: 'success' });
+        this.closeAssignModal();
+        this.loadWorkOrderDetail();
+      } else {
+        wx.showToast({ title: res.data?.message || '分配失败', icon: 'none' });
+      }
+    } catch (e) {
+      wx.showToast({ title: '分配失败', icon: 'none' });
+    } finally {
+      wx.hideLoading();
+    }
   }
 }); 
