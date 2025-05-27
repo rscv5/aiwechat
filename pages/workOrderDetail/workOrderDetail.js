@@ -75,7 +75,9 @@ Page({
           workOrder.processingLogs = workOrder.processingLogs.map(log => ({
             ...log,
             createdAt: formatDate(log.createdAt),
-            updatedAt: formatDate(log.updatedAt)
+            updatedAt: formatDate(log.updatedAt),
+            // 根据 actionType 生成更友好的描述文本
+            displayDescription: this.getDisplayDescription(log)
           }));
         }
         // 格式化反馈记录的时间
@@ -476,5 +478,29 @@ Page({
     } finally {
       wx.hideLoading();
     }
-  }
+  },
+
+  // 根据 actionType 生成处理记录的展示文本
+  getDisplayDescription(log) {
+    switch (log.actionType) {
+      case '提交工单':
+        return log.operatorRole + '提交工单';
+      case '认领工单':
+        // TODO: 如果operatorOpenid对应的是网格员，可以显示网格员名称
+        return log.operatorRole + '认领了工单';
+      case '开始处理':
+         return log.operatorRole + '开始处理工单';
+      case '反馈处理':
+        return log.operatorRole + '反馈了处理结果';
+      case '主动上报':
+        return log.operatorRole + '将工单上报给片区长';
+      case '系统超时上报':
+        return '系统超时自动上报';
+      case '片区长分配':
+         // TODO: 如果operatorOpenid对应的是片区长，可以显示片区长名称，并显示分配给哪个网格员
+        return log.operatorRole + '重新分配了工单';
+      default:
+        return log.actionDescription || '未知操作';
+    }
+  },
 }); 

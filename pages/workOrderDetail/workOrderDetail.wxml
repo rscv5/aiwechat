@@ -74,11 +74,11 @@
     <view class="timeline-section" wx:if="{{workOrder.processingLogs && workOrder.processingLogs.length}}">
       <text class="section-title">处理记录</text>
       <view class="timeline">
-        <block wx:for="{{workOrder.processingLogs}}" wx:key="workId">
+        <block wx:for="{{workOrder.processingLogs}}" wx:key="logId">
           <view class="timeline-item {{index === workOrder.processingLogs.length - 1 ? 'latest' : ''}}">
             <view class="timeline-dot"></view>
             <view class="timeline-content">
-              <text class="timeline-action">{{item.actionDescription}}</text>
+              <text class="timeline-action">{{item.displayDescription}}</text>
               <text class="timeline-time">{{item.createdAt || item.updatedAt || '未知时间'}}</text>
             </view>
           </view>

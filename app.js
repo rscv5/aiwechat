@@ -5,11 +5,6 @@ App({
   // 全局数据管理
   globalData: {
     baseUrl: 'http://127.0.0.1:8080',  // 使用127.0.0.1替代localhost
-    communityInfo: {
-      name: '明发社区',
-      address: '示例地址',
-      description: '智慧社区示范点'
-    },
     userInfo: null,
     isGrid: false,
     isArea: false,

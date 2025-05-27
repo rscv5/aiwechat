@@ -133,8 +133,11 @@ Page({
                     if (a.statusEn !== 'completed' && b.statusEn === 'completed') return -1;
                     // 处理中/已上报按 updatedAt 降序
                     if (a.statusEn === b.statusEn) {
-                        const aTime = new Date(a.updatedAt || a.createdAt).getTime();
-                        const bTime = new Date(b.updatedAt || b.createdAt).getTime();
+                        // 兼容iOS日期格式，将横线替换为斜线
+                        const aDateString = (a.updatedAt || a.createdAt).replace(/-/g, '/');
+                        const bDateString = (b.updatedAt || b.createdAt).replace(/-/g, '/');
+                        const aTime = new Date(aDateString).getTime();
+                        const bTime = new Date(bDateString).getTime();
                         return bTime - aTime;
                     }
                     return 0;

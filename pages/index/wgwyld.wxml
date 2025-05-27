@@ -1,0 +1,7 @@
+<!--pages/index/wgwyld.wxml-->
+<view class="container">
+  <view class="big-image-container">
+    <image src="{{img}}" mode="aspectFit" class="big-image"/>
+    <view class="big-title">{{title}}</view>
+  </view>
+</view>

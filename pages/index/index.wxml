@@ -2,30 +2,74 @@
 
 <scroll-view class="scrollarea" scroll-y type="list">
   <view class="container">
-    <!-- 社区基本信息 -->
-    <view class="community-header">
-      <view class="community-name">{{communityInfo.name}}</view>
-      <view class="community-desc">{{communityInfo.description}}</view>
-    </view>
-
-    <!-- 社区党建 -->
-    <view class="section">
-      <view class="section-header">
-        <text class="section-title">社区党建</text>
-        <text class="section-more" bindtap="onMoreParty">></text>
+    <view class="section" bindtap="showCommunityIntroModal">
+   <view class="section-header">
+    <view class="community-name">{{communityInfo.name}}</view>
+    <!--点击整个section显示简介-->
+   </view>
+      <view class="intro-content">
+        <text class="community-desc">{{communityInfo.description}}</text>
       </view>
-      <scroll-view class="card-scroll" scroll-x>
+  </view>
+
+  <!--小区简介弹窗 -->
+  <view class="modal-bg {{showIntro ? 'active' : ''}}" catchtouchmove="preventTouchMove"></view>
+  <view class="modal-container {{showIntro ? 'active' : ''}}">
+    <view class="modal-content">
+      <text class="modal-title">小区简介</text>
+      <scroll-view class="modal-body" scroll-y>
+        <text class="modal-desc">
+          {{communityInfo.alldesc}}
+        </text>
+      </scroll-view>
+      <button class="modal-close-btn" bindtap="hideCommunityIntroModal">关闭</button>
+    </view>
+  </view>  
+
+    <!-- 网格+物业联动 -->
+    <view class="section1">
+      <view class="section-header">
+        <text class="section-title">网格+物业联动</text>
+        <text class="section-more" bindtap="onMoreParty">查看更多</text>
+      </view>
+      <scroll-view class="card-scroll1" scroll-x>
         <view class="party-card" wx:for="{{partyActivities}}" wx:key="id" bindtap="onPartyTap" data-id="{{item.id}}">
           <image class="cover" src="{{item.cover}}" mode="aspectFill"/>
           <view class="info">
             <text class="title">{{item.title}}</text>
-            <view class="meta">
-              <text class="date">{{item.date}}</text>
-              <text class="location">{{item.location}}</text>
-            </view>
+            <view class="meta"></view>
           </view>
         </view>
       </scroll-view>
+    </view>
+
+    <!-- 活动风采 -->
+    <!-- 小区今昔  -->
+    <view class="section">
+    <view class="section-header">
+        <text class="section-title">小区今昔</text>
+        <text class="section-more" bindtap="onMoreCompare">查看更多</text>
+    </view>
+    <scroll-view class="card-scroll" scroll-x>
+        <view 
+        wx:for="{{compareList}}"  
+        wx:key="id" 
+        class="compare-unit"
+        bindtap="onCompareTap" 
+        data-id="{{item.id}}"
+        >
+        <!--对比图片和描述容器-->
+        <view class="compare-container">
+            <!-- #对比图片 -->
+            <image class="compare-img" src="{{item.before}}" mode="aspectFill"/>
+            <image class="compare-img" src="{{item.after}}" mode="aspectFill"/>
+            <!-- #图片描述 -->
+            <view class="compare-desc">
+                <text class="title">{{item.title}}</text>
+            </view>
+          </view>
+        </view>
+    </scroll-view>
     </view>
 
     <!-- 社区活动 -->
