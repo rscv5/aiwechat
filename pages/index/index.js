@@ -146,37 +146,54 @@ Page({
       {
         id: 1,
         cover: 'https://img.picui.cn/free/2025/05/27/68357976848f3.jpg',
+        images:[
+          {src:'https://img.picui.cn/free/2025/05/28/68367737313a0.jpg'},
+          {src:'https://img.picui.cn/free/2025/05/28/68367be97e544.jpg'},
+        ],
         title: '雷锋日活动',
         date:'2025-01-01',
-        location:'明发社区活动点'
+        location:'明发社区活动点',
+        desc:'网格员和三期南物业开展雷锋日活动'
       },
       {
         id: 2,
         cover: 'https://img.picui.cn/free/2025/05/27/6835794bf2994.jpg',
+        images:[
+          {src:'https://img.picui.cn/free/2025/05/27/6835794ab43d0.jpg'}
+        ],
         title: '迎春文艺汇演活动',
         date:'2025-01-02',
-        location:'社区广场'
+        location:'社区广场',
+        desc:'网格员和物业开展迎春文艺汇演活动'
       },
       {
         id: 3,
         cover: 'https://img.picui.cn/free/2025/05/27/683579c2bacda.jpg',
+        images:[],
         title: '义卖活动',
         date:'2025-01-03',
-        location:'明发社区'
+        location:'明发社区',
+        desc:'网格员和一期物业开展义卖活动'
       },
       {
         id: 4,
         cover: 'https://img.picui.cn/free/2025/05/27/68357a33377cd.jpg',
+        images:[
+          {src:'https://img.picui.cn/free/2025/05/28/68367c4d6c33f.jpg'},
+        ],
         title: '写春联活动',
         date:'2025-01-03',
-        location:'明发社区'
+        location:'明发社区',
+        desc:'网格员和物业开展写春联活动'
       },
       {
         id:5,
-        conver: 'https://img.picui.cn/free/2025/05/27/68357a6e7658c.jpg',
+        cover: 'https://img.picui.cn/free/2025/05/27/68357a6e7658c.jpg',
+        images:[],
         title: '便民活动',
         date:'2025-01-03',
-        location:'明发社区'
+        location:'明发社区',
+        desc:'网格员和物业开展便民活动'
       }
     ],
     // 公示列表
@@ -239,12 +256,12 @@ Page({
     });
   },
 
-  //跳转到今昔对比网页
-  onMoreCompare(){
-    wx.navigateTo({
-      url: 'pages/index/indexdetail/comparedetail',
-    })
-  },
+  // //跳转到今昔对比网页
+  // onMoreCompare(){
+  //   wx.navigateTo({
+  //     url: 'pages/index/indexdetail/comparedetail',
+  //   })
+  // },
 
   //今昔对比跳转
   onCompareTap(e) {
@@ -262,7 +279,7 @@ Page({
   // 导航到社区活动页面
   onMoreActivity() {
     wx.navigateTo({
-      url: '/pages/empty/index?title=社区活动'
+      url: '/pages/index/indexdetail/actlist'
     })
   },
 
@@ -277,7 +294,7 @@ Page({
   onActivityTap(e) {
     const { id } = e.currentTarget.dataset
     wx.navigateTo({
-      url: `/pages/empty/index?title=活动详情&id=${id}`
+      url: `/pages/index/indexdetail/activities?id=${id}`
     })
   },
 

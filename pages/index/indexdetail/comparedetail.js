@@ -5,62 +5,61 @@ Page({
      * 页面的初始数据
      */
     data: {
-
+        title: '',
+        beforeImage: '',
+        afterImage: '',
+        description: ''
     },
 
     /**
      * 生命周期函数--监听页面加载
      */
     onLoad(options) {
-
+        if (options.title) {
+            this.setData({
+                title: decodeURIComponent(options.title)
+            });
+        }
+        if (options.img) {
+            this.setData({
+                beforeImage: decodeURIComponent(options.img)
+            });
+        }
+        // Get the after image from the compareList in the parent page
+        const pages = getCurrentPages();
+        const prevPage = pages[pages.length - 2];
+        const compareList = prevPage.data.compareList;
+        const currentItem = compareList.find(item => item.before === this.data.beforeImage);
+        if (currentItem) {
+            this.setData({
+                afterImage: currentItem.after,
+                description: currentItem.title
+            });
+        }
     },
 
-    /**
-     * 生命周期函数--监听页面初次渲染完成
-     */
-    onReady() {
 
-    },
-
-    /**
-     * 生命周期函数--监听页面显示
-     */
-    onShow() {
-
-    },
-
-    /**
-     * 生命周期函数--监听页面隐藏
-     */
-    onHide() {
-
-    },
-
-    /**
-     * 生命周期函数--监听页面卸载
-     */
-    onUnload() {
-
-    },
-
-    /**
-     * 页面相关事件处理函数--监听用户下拉动作
-     */
-    onPullDownRefresh() {
-
-    },
-
-    /**
-     * 页面上拉触底事件的处理函数
-     */
-    onReachBottom() {
-
-    },
 
     /**
      * 用户点击右上角分享
      */
     onShareAppMessage() {
 
+    },
+
+    // Preview before image
+    previewBeforeImage() {
+        wx.previewImage({
+            current: this.data.beforeImage,
+            urls: [this.data.beforeImage]
+        });
+    },
+
+    // Preview after image
+    previewAfterImage() {
+        wx.previewImage({
+            current: this.data.afterImage,
+            urls: [this.data.afterImage]
+        });
     }
 })

@@ -72,7 +72,6 @@
     <view class="section">
     <view class="section-header">
         <text class="section-title">小区今昔</text>
-        <text class="section-more" bindtap="onMoreCompare">查看更多</text>
     </view>
     <scroll-view class="card-scroll" scroll-x>
         <view 
@@ -100,7 +99,7 @@
     <view class="section">
       <view class="section-header">
         <text class="section-title">社区活动</text>
-        <text class="section-more" bindtap="onMoreActivity">></text>
+        <text class="section-more" bindtap="onMoreActivity">更多</text>
       </view>
       <scroll-view class="card-scroll" scroll-x>
         <view class="activity-card" wx:for="{{activities}}" wx:key="id" bindtap="onActivityTap" data-id="{{item.id}}">

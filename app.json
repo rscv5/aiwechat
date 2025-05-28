@@ -9,7 +9,8 @@
         "pages/captain/workorder/list",
         "pages/captain/workorder/reassign",
         "pages/index/wgwyld",
-        "pages/index/indexdetail/comparedetail"
+        "pages/index/indexdetail/comparedetail",
+        "pages/index/indexdetail/activities"
     ],
     "window": {
         "backgroundTextStyle": "light",
