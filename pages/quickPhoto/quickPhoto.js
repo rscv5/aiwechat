@@ -1,6 +1,17 @@
 const app = getApp();
 import { API, formatDate } from '../../constants/index';
 
+// 明发社区的地理边界（多边形顶点坐标）
+const MINGFA_BOUNDARY = {
+    name: "明发社区",
+    points: [
+        { latitude: 32.139863, longitude: 118.758625 }, // 东边界（长江）
+        { latitude: 32.127578, longitude: 118.744261 }, // 西边界（明发三期北片与桥北社区交界）
+        { latitude: 32.127105, longitude: 118.746111 }, // 南边界（京沪铁路/长江大桥）
+        { latitude: 32.141789, longitude: 118.752283}  // 北边界（引水河与沿江街道交界）
+    ]
+};
+
 Page({
 
     /**
@@ -17,7 +28,8 @@ Page({
         showPrivacyPopup: false,
         hasPrivacyAuthorized: false,
         locationAuth: false,
-        phoneAuth: false
+        phoneAuth: false,
+        isInCommunity: false  // 新增：是否在社区范围内
     },
 
     /**
@@ -229,7 +241,21 @@ Page({
         });
     },
 
-    // 获取位置信息
+    // 判断点是否在多边形内（射线法）
+    isPointInPolygon(point, polygon) {
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const xi = polygon[i].longitude, yi = polygon[i].latitude;
+            const xj = polygon[j].longitude, yj = polygon[j].latitude;
+            
+            const intersect = ((yi > point.latitude) !== (yj > point.latitude))
+                && (point.longitude < (xj - xi) * (point.latitude - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    },
+
+    // 修改获取位置信息方法
     async getLocation() {
         console.log('=== 开始获取位置信息 ===');
         this.setData({ locationLoading: true });
@@ -274,6 +300,30 @@ Page({
                 throw new Error('获取位置信息失败');
             }
 
+            // 检查是否在明发社区范围内
+            const userPoint = {
+                latitude: locationRes.latitude,
+                longitude: locationRes.longitude
+            };
+            const isInCommunity = this.isPointInPolygon(userPoint, MINGFA_BOUNDARY.points);
+            
+            if (!isInCommunity) {
+                this.setData({ 
+                    location: '',
+                    locationLoading: false,
+                    isInCommunity: false
+                });
+                wx.showModal({
+                    title: '提示',
+                    content: '您当前不在明发社区范围内，无法创建工单',
+                    showCancel: false,
+                    success: () => {
+                        wx.navigateBack();
+                    }
+                });
+                return;
+            }
+
             // 使用微信内置的逆地址解析，获取更详细的地址信息
             console.log('开始逆地址解析');
             const addressRes = await new Promise((resolve, reject) => {
@@ -303,7 +353,8 @@ Page({
                 console.log('最终地址信息:', address);
                 this.setData({ 
                     location: address,
-                    locationLoading: false
+                    locationLoading: false,
+                    isInCommunity: true
                 }, () => {
                     this.validateForm();
                 });
@@ -314,7 +365,8 @@ Page({
             console.error('获取位置信息失败:', error);
             this.setData({ 
                 location: '',
-                locationLoading: false
+                locationLoading: false,
+                isInCommunity: false
             });
             wx.showToast({
                 title: error.message || '获取位置失败，请重试',
@@ -357,8 +409,8 @@ Page({
     // 表单验证
     validateForm() {
         console.log('=== 表单验证 ===');
-        const { images, content, location, building, phone } = this.data;
-        console.log('当前表单数据:', { images, content, location, building, phone });
+        const { images, content, location, building, phone, isInCommunity } = this.data;
+        console.log('当前表单数据:', { images, content, location, building, phone, isInCommunity });
         
         const isValid = 
             images.length > 0 && 
@@ -367,7 +419,8 @@ Page({
             content.length <= 200 &&
             location &&
             building &&
-            /^1[3-9]\d{9}$/.test(phone);
+            /^1[3-9]\d{9}$/.test(phone) &&
+            isInCommunity;  // 添加社区范围检查
 
         console.log('表单验证结果:', isValid);
         this.setData({ canSubmit: isValid });
