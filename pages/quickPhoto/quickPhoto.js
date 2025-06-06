@@ -1,5 +1,6 @@
 const app = getApp();
 import { API, formatDate } from '../../constants/index';
+const auth = require('../../utils/auth');
 
 // 明发社区的地理边界（多边形顶点坐标）
 const MINGFA_BOUNDARY = {
@@ -38,39 +39,13 @@ Page({
     onLoad(options) {
         console.log('=== quickPhoto onLoad ===', options);
         // 检查是否已登录
-        const userInfo = wx.getStorageSync('userInfo');
-        console.log('当前用户信息:', userInfo);
+        const isLoggedIn = auth.checkLogin();
+        console.log('登录状态检查结果:', isLoggedIn);
         
-        if (!userInfo) {
+        if (!isLoggedIn) {
             console.log('用户未登录，准备跳转到登录页');
-            wx.showModal({
-                title: '提示',
-                content: '请先登录后再使用随手拍功能',
-                showCancel: false,
-                success: () => {
-                    console.log('用户确认跳转');
-                    // 修改导航逻辑，使用 redirectTo 替代 switchTab + navigateTo
-                    wx.redirectTo({
-                        url: '/pages/login/login',
-                        success: () => {
-                            console.log('跳转到登录页成功');
-                        },
-                        fail: (err) => {
-                            console.error('跳转到登录页失败:', err);
-                            // 如果跳转失败，尝试使用 reLaunch
-                            wx.reLaunch({
-                                url: '/pages/login/login',
-                                fail: (reLaunchErr) => {
-                                    console.error('reLaunch 到登录页也失败:', reLaunchErr);
-                                    wx.showToast({
-                                        title: '页面跳转失败，请重试',
-                                        icon: 'none'
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
+            wx.redirectTo({
+                url: '/pages/login/login'
             });
             return;
         }
@@ -92,7 +67,7 @@ Page({
      */
     onShow() {
         console.log('=== quickPhoto onShow ===');
-        console.log('当前页面数据:', this.data);
+        // 不再重复检查登录状态
     },
 
     /**

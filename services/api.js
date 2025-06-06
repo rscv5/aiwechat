@@ -45,39 +45,29 @@ const baseUrl = 'http://127.0.0.1:8080'
 export const userApi = {
   // 网格员/片区长登录
   gridLogin: (username, password) => {
+    console.log('Grid login request:', { username, password });
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/grid/login`,
         method: 'POST',
-        header: {
-          'content-type': 'application/json',
-          'Accept': 'application/json'
-        },
         data: {
           username: username,
           password: password
         },
+        header: {
+          'Content-Type': 'application/json'
+        },
         success: (res) => {
           console.log('Grid login response:', res);
-          if (res.statusCode === 200 && res.data) {
-            // 确保响应中包含 token
-            if (!res.data.token && !res.data.accessToken) {
-              console.error('登录响应中没有token:', res.data);
-              reject(new Error('登录响应数据不完整'));
-              return;
-            }
-            // 保存 token
-            const token = res.data.token || res.data.accessToken;
-            wx.setStorageSync('auth_token', token);
-            console.log('保存的token:', token);
+          if (res.statusCode === 200) {
             resolve(res.data);
           } else {
-            reject(new Error(res.data?.message || '登录失败'));
+            reject(new Error(res.data || '登录失败'));
           }
         },
         fail: (err) => {
           console.error('Grid login request failed:', err);
-          reject(new Error(err.errMsg || '网络请求失败'));
+          reject(new Error('网络请求失败'));
         }
       });
     });
@@ -88,7 +78,7 @@ export const userApi = {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/user/login`,
-      method: 'POST',
+        method: 'POST',
         header: {
           'content-type': 'application/json',
           'Accept': 'application/json'
@@ -105,9 +95,17 @@ export const userApi = {
               reject(new Error('登录响应数据不完整'));
               return;
             }
+            
             // 保存 token
             const token = res.data.token || res.data.accessToken;
             wx.setStorageSync('auth_token', token);
+            
+            // 如果响应中包含 openid，则保存它
+            if (res.data.openid) {
+              wx.setStorageSync('user_openid', res.data.openid);
+              console.log('保存的openid:', res.data.openid);
+            }
+            
             console.log('保存的token:', token);
             resolve(res.data);
           } else {

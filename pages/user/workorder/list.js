@@ -26,27 +26,13 @@ Page({
   onLoad() {
     console.log('=== 页面加载 onLoad ===');
     // 检查登录状态并加载数据
-    this.checkLoginAndLoadData();
+    this.loadWorkOrders();
   },
 
   // 页面显示时触发，每次页面显示都会触发
   onShow() {
     console.log('=== 页面显示 onShow ===');
-    // 获取当前存储的 token
-    const token = wx.getStorageSync('auth_token');
-    console.log('当前token:', token);
-    
-    // 如果有 token，说明用户已登录，直接加载数据
-    if (token) {
-      console.log('检测到token，开始加载数据');
-      this.loadWorkOrders();
-    } else {
-      console.log('未检测到token，跳转到登录页');
-      // 如果没有 token，跳转到登录页
-      wx.reLaunch({
-        url: '/pages/login/login'
-      });
-    }
+    // 不再重复检查登录状态和加载数据
   },
 
   // 下拉刷新时触发
@@ -55,39 +41,6 @@ Page({
     this.loadWorkOrders().then(() => {
       wx.stopPullDownRefresh();
     });
-  },
-
-  // 检查登录状态并加载数据
-  async checkLoginAndLoadData() {
-    console.log('=== 检查登录状态并加载数据 ===');
-    this.setData({ isLoading: true });
-    
-    try {
-      // 调用 auth 模块检查登录状态
-      const isLoggedIn = await auth.checkLoginAndRedirect();
-      console.log('登录状态检查结果:', isLoggedIn);
-      
-      if (isLoggedIn) {
-        // 如果已登录，加载工单数据
-        console.log('用户已登录，开始加载工单数据');
-        await this.loadWorkOrders();
-      } else {
-        console.log('用户未登录，跳转到登录页');
-        // 如果未登录，跳转到登录页
-        wx.reLaunch({
-          url: '/pages/login/login'
-        });
-      }
-    } catch (error) {
-      console.error('登录检查出错:', error);
-      wx.showToast({
-        title: '登录状态检查失败',
-        icon: 'none'
-      });
-    } finally {
-      // 无论成功失败，都关闭加载状态
-      this.setData({ isLoading: false });
-    }
   },
 
   // 切换标签页
@@ -101,9 +54,18 @@ Page({
   // 加载工单列表
   async loadWorkOrders() {
     console.log('=== 开始加载工单列表 ===');
+    this.setData({ isLoading: true });
+    
     try {
       const token = wx.getStorageSync('auth_token');
-      const userOpenid = wx.getStorageSync('user_openid');
+      if (!token) {
+        console.log('未检测到token，跳转到登录页');
+        wx.redirectTo({
+          url: '/pages/login/login'
+        });
+        return;
+      }
+
       let status = this.data.activeTab === 0 ? '全部' : this.data.tabs[this.data.activeTab];
       
       // 转换状态值为后端期望的值
@@ -119,20 +81,19 @@ Page({
       
       console.log('请求参数:', {
         token: token ? '存在' : '不存在',
-        userOpenid: userOpenid ? '存在' : '不存在',
         status: status,
         baseUrl: app.globalData.baseUrl
       });
 
-      if (!userOpenid) {
-        throw new Error('用户未登录或登录已过期，请重新登录');
-      }
-      
       const url = `${app.globalData.baseUrl}/api/workorder/user`;
       console.log('发送请求到:', url);
       
       // 使用Promise包装wx.request
       const requestPromise = new Promise((resolve, reject) => {
+        const requestData = {
+          status: status
+        };
+
         wx.request({
           url: url,
           method: 'GET',
@@ -140,10 +101,7 @@ Page({
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          data: {
-            userOpenid: userOpenid,
-            status: status
-          },
+          data: requestData,
           success: (res) => {
             console.log('请求成功，响应数据:', res);
             resolve(res);
@@ -165,31 +123,27 @@ Page({
         throw new Error('网络请求失败，请检查网络连接');
       }
 
-      if (res.statusCode === 200 && res.data && res.data.code === 200) {
+      if (res.statusCode === 200 && res.data) {
         // 转换后端数据格式为前端所需格式
-        const workOrders = res.data.data.map(order => {
-          // 格式化时间
-          const createTime = new Date(order.createdAt);
-          const formattedTime = `${createTime.getFullYear()}-${String(createTime.getMonth() + 1).padStart(2, '0')}-${String(createTime.getDate()).padStart(2, '0')} ${String(createTime.getHours()).padStart(2, '0')}:${String(createTime.getMinutes()).padStart(2, '0')}`;
+        const workOrdersData = res.data.data || [];  // 从响应中获取 data 数组
+        const workOrders = workOrdersData.map(order => {
+          // 格式化时间（保持原有格式，不做转换）
+          const createTime = order.createdAt ? order.createdAt.substring(0, 16).replace('T', ' ') : '未知时间';
           
-          // 截取描述内容，限制显示长度
-          const description = order.description.length > 50 
-            ? order.description.substring(0, 50) + '...' 
-            : order.description;
-
           return {
             id: order.workId,
-            description: description,
+            description: order.description || '无描述',
             status: this.data.statusMap[order.status]?.text || order.status,
-            createTime: formattedTime,
+            createTime: createTime,
             buildingInfo: order.buildingInfo || '未填写楼栋信息'
           };
         });
 
         this.setData({
-          workOrders: workOrders
+          workOrders: workOrders,
+          isLoading: false
         });
-        console.log('工单数据加载完成:', workOrders.length, '条记录');
+        console.log('处理后的工单数据:', workOrders);
       } else {
         console.error('请求失败:', {
           statusCode: res.statusCode,

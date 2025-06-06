@@ -86,9 +86,10 @@ const checkLoginAndRedirect = async () => {
     return false;
   }
 
-  // 如果已经有完整的用户信息，直接返回 true
+  // 如果已经有完整的用户信息，直接返回true，不进行跳转
+  // 让调用方决定是否需要跳转
   if (userInfo && userRole) {
-    console.log('已有完整用户信息，直接返回');
+    console.log('已有完整用户信息，返回true');
     return true;
   }
 
@@ -98,22 +99,33 @@ const checkLoginAndRedirect = async () => {
     const response = await userApi.getUserInfo(token);
     console.log('获取用户信息成功:', response);
 
-    if (response && response.role) {
+    if (response) {
       // 保存用户信息到本地存储
-      console.log('保存用户信息到本地存储');
+      const role = response.role || '普通用户';
+      console.log('保存用户信息到本地存储，角色:', role);
       wx.setStorageSync('userInfo', response);
-      wx.setStorageSync('userRole', response.role);
+      wx.setStorageSync('userRole', role);
       // 确保 token 被正确保存
       wx.setStorageSync('auth_token', token);
       return true;
     }
-    throw new Error('用户信息不完整');
-  } catch (err) {
-    console.error('获取用户信息失败:', err);
-    // 获取用户信息失败时，清除所有存储
+    
+    console.log('用户信息不完整，清除token并跳转登录页');
     wx.removeStorageSync('auth_token');
     wx.removeStorageSync('userInfo');
     wx.removeStorageSync('userRole');
+    wx.reLaunch({
+      url: '/pages/login/login'
+    });
+    return false;
+  } catch (err) {
+    console.error('获取用户信息失败:', err);
+    // 只有在确认是token过期时才清除存储
+    if (err.message?.includes('登录已过期') || err.message?.includes('token无效')) {
+      wx.removeStorageSync('auth_token');
+      wx.removeStorageSync('userInfo');
+      wx.removeStorageSync('userRole');
+    }
     wx.reLaunch({
       url: '/pages/login/login'
     });

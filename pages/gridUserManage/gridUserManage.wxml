@@ -1,0 +1,99 @@
+<view class="container">
+    <view class="header">
+        <text class="title">网格员管理</text>
+        <button wx:if="{{isSuperAdmin}}" class="add-btn" bindtap="showAddModal">
+            <text class="add-icon">+</text>
+            添加网格员
+        </button>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="loading" wx:if="{{isLoading}}">
+        <view class="loading-icon"></view>
+        <text>加载中...</text>
+    </view>
+
+    <!-- 错误提示 -->
+    <view class="error" wx:elif="{{error}}">
+        <text>{{error}}</text>
+        <button class="retry-btn" bindtap="loadGridUsers">重试</button>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:elif="{{gridUsers.length === 0}}">
+        <text>暂无网格员</text>
+    </view>
+
+    <!-- 网格员列表 -->
+    <view class="grid-list" wx:else>
+        <view class="grid-item" wx:for="{{gridUsers}}" wx:key="userId">
+            <view class="grid-card">
+                <view class="grid-header">
+                    <view class="grid-title">
+                        <text class="name">{{item.username}}</text>
+                        <text class="role">网格员</text>
+                    </view>
+                </view>
+                
+                <view class="grid-content">
+                    <view class="info-row">
+                        <text class="label">手机号码：</text>
+                        <text class="value">{{item.phoneNumber}}</text>
+                    </view>
+                    <view class="info-row">
+                        <text class="label">创建时间：</text>
+                        <text class="value">{{item.createTime || '暂无'}}</text>
+                    </view>
+                    <view class="info-row">
+                        <text class="label">最近登录：</text>
+                        <text class="value">{{item.lastLoginTime || '暂无'}}</text>
+                    </view>
+                </view>
+
+                <view class="grid-footer" wx:if="{{isSuperAdmin}}">
+                    <button class="action-btn reset" bindtap="resetPassword" data-id="{{item.userId}}">
+                        重置密码
+                    </button>
+                    <button class="action-btn delete" bindtap="deleteGridUser" data-id="{{item.userId}}">
+                        删除账号
+                    </button>
+                </view>
+            </view>
+        </view>
+    </view>
+
+    <!-- 添加网格员弹窗 -->
+    <view class="modal" wx:if="{{showAddModal}}">
+        <view class="modal-content">
+            <view class="modal-header">
+                <text class="modal-title">添加网格员</text>
+            </view>
+            <view class="modal-body">
+                <view class="form-item">
+                    <text class="form-label">用户名</text>
+                    <input 
+                        class="form-input" 
+                        placeholder="请输入用户名" 
+                        value="{{newUser.username}}"
+                        bindinput="onUsernameInput"
+                    />
+                </view>
+                <view class="form-item">
+                    <text class="form-label">手机号码</text>
+                    <input 
+                        class="form-input" 
+                        placeholder="请输入手机号" 
+                        value="{{newUser.phoneNumber}}"
+                        bindinput="onPhoneInput"
+                        type="number"
+                        maxlength="11"
+                    />
+                </view>
+            </view>
+            <view class="modal-footer">
+                <button class="modal-btn cancel" bindtap="hideAddModal">取消</button>
+                <button class="modal-btn confirm" bindtap="addGridUser">确定</button>
+            </view>
+        </view>
+    </view>
+</view> 

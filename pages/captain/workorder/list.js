@@ -1,6 +1,8 @@
 import request from '../../../utils/request';
 import { formatDate } from '../../../constants/index';
 
+const app = getApp();
+
 Page({
     data: {
         orders: [],
@@ -18,10 +20,12 @@ Page({
             '处理中': 'processing',
             '已上报': 'reported',
             '处理完': 'completed'
-        }
+        },
+        isSuperAdmin: false
     },
 
     onLoad() {
+        this.checkSuperAdmin();
         this.loadOrders();
     },
 
@@ -114,6 +118,105 @@ Page({
         const { id } = e.currentTarget.dataset;
         wx.navigateTo({
             url: `/pages/captain/workorder/reassign?id=${id}`
+        });
+    },
+
+    // 检查是否是超级管理员
+    checkSuperAdmin() {
+        try {
+            const userInfo = wx.getStorageSync('userInfo');
+            console.log('当前用户信息:', JSON.stringify(userInfo, null, 2));
+            
+            // 检查用户信息中的 isSuperAdmin 字段
+            const isSuperAdmin = userInfo && userInfo.isSuperAdmin === true;
+            console.log('是否是超级管理员:', isSuperAdmin);
+            console.log('isSuperAdmin 字段类型:', typeof userInfo?.isSuperAdmin);
+            
+            this.setData({
+                isSuperAdmin: isSuperAdmin
+            });
+            
+            // 如果是片区长但没有 isSuperAdmin 字段，可能需要重新获取用户信息
+            if (userInfo && userInfo.role === '片区长' && userInfo.isSuperAdmin === undefined) {
+                console.log('片区长缺少 isSuperAdmin 字段，尝试重新获取用户信息');
+                this.refreshUserInfo();
+            }
+        } catch (error) {
+            console.error('检查超级管理员状态失败:', error);
+            this.setData({
+                isSuperAdmin: false
+            });
+        }
+    },
+
+    // 刷新用户信息
+    async refreshUserInfo() {
+        try {
+            const token = wx.getStorageSync('auth_token');
+            if (!token) {
+                console.log('未找到 token，无法刷新用户信息');
+                return;
+            }
+
+            console.log('开始请求用户信息, token:', token);
+            const res = await new Promise((resolve, reject) => {
+                wx.request({
+                    url: `${getApp().globalData.baseUrl}/api/user/info`,
+                    method: 'GET',
+                    header: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    success: (res) => {
+                        console.log('请求成功，状态码:', res.statusCode);
+                        console.log('响应数据:', res.data);
+                        resolve(res);
+                    },
+                    fail: (err) => {
+                        console.error('请求失败:', err);
+                        reject(err);
+                    }
+                });
+            });
+
+            if (res.statusCode === 200 && res.data) {
+                console.log('获取到新的用户信息:', res.data);
+                // 更新存储的用户信息
+                const updatedUserInfo = {
+                    ...wx.getStorageSync('userInfo'),
+                    ...res.data
+                };
+                console.log('更新后的用户信息:', updatedUserInfo);
+                wx.setStorageSync('userInfo', updatedUserInfo);
+                
+                // 更新页面状态
+                this.setData({
+                    isSuperAdmin: res.data.isSuperAdmin === true
+                });
+                console.log('页面状态已更新, isSuperAdmin:', res.data.isSuperAdmin);
+            } else {
+                console.error('获取用户信息失败:', res);
+                if (res.statusCode === 403) {
+                    // token 可能过期，尝试重新登录
+                    wx.redirectTo({
+                        url: '/pages/login/login'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('刷新用户信息失败:', error);
+            wx.showToast({
+                title: '获取用户信息失败',
+                icon: 'none',
+                duration: 2000
+            });
+        }
+    },
+
+    // 跳转到网格员管理页面
+    navigateToGridManage() {
+        wx.navigateTo({
+            url: '/pages/gridUserManage/gridUserManage'
         });
     }
 }); 

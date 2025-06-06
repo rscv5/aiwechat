@@ -10,17 +10,20 @@ Page({
     password: '',
     loading: false,
     isLoading: false,
-    showLoginForm: false
+    showLoginForm: true
   },
 
   // 页面加载时检查登录状态
   onLoad() {
+    console.log('=== 登录页面加载 onLoad ===');
+    // 只在 onLoad 时检查一次登录状态
     this.checkLoginAndRedirect();
   },
 
-  // 页面显示时检查登录状态
+  // 页面显示时不再重复检查
   onShow() {
-    this.checkLoginAndRedirect();
+    console.log('=== 登录页面显示 onShow ===');
+    // 不再重复检查登录状态
   },
 
   // 检查登录状态并重定向
@@ -36,37 +39,29 @@ Page({
       userRole: userRole ? '存在' : '不存在'
     });
 
+    // 如果没有完整的登录信息，直接显示登录表单
     if (!token || !userInfo || !userRole) {
       console.log('存储信息不完整，显示登录表单');
       this.setData({ showLoginForm: true });
       return;
     }
 
-    try {
-      console.log('开始验证token');
-      const response = await this.getUserInfo(token);
-      console.log('token验证结果:', response);
-      
-      if (response) {
-        // 更新用户信息，但保留原有的 token
-        const updatedUserInfo = {
-          ...response,
-          token: token // 确保保留原有的 token
-        };
-        this.setGlobalData(updatedUserInfo);
-        auth.redirectByRole(response.role);
-      } else {
-        console.log('token验证失败，显示登录表单');
-        this.setData({ showLoginForm: true });
-      }
-    } catch (err) {
-      console.error('token验证出错:', err);
-      wx.showToast({
-        title: err.message || '登录已过期，请重新登录',
-        icon: 'none',
-        duration: 2000
+    // 如果有完整的登录信息，直接使用它们进行跳转
+    console.log('准备根据角色跳转，当前角色:', userRole);
+    if (userRole === '网格员') {
+      wx.reLaunch({
+        url: '/pages/grid/workorder/list'
       });
-      this.setData({ showLoginForm: true });
+    } else if (userRole === '片区长') {
+      wx.reLaunch({
+        url: '/pages/captain/workorder/list'
+      });
+    } else {
+      // 普通用户跳转到用户工单列表页面
+      console.log('普通用户跳转到工单列表页面');
+      wx.reLaunch({
+        url: '/pages/user/workorder/list'
+      });
     }
   },
 
@@ -75,25 +70,35 @@ Page({
     console.log('=== 设置全局数据 ===');
     console.log('登录响应数据:', response);
     
-    // 保存到全局数据
-    app.globalData.userInfo = response;
-    app.globalData.isGrid = response.role === '网格员';
-    app.globalData.isArea = response.role === '片区长';
-    
-    // 保存到本地存储
-    // 注意：token 可能在 response.token 或 response.accessToken 中
-    const token = response.token || response.accessToken;
-    console.log('保存的token:', token);
-    
-    if (!token) {
-      console.error('登录响应中没有token');
-      throw new Error('登录响应数据不完整');
+    // 处理不同的响应结构
+    let userInfo;
+    if (response.userInfo) {
+      // 管理员登录响应
+      userInfo = {
+        ...response.userInfo,
+        token: response.token
+      };
+    } else {
+      // 普通用户登录响应
+      userInfo = {
+        ...response,
+        role: response.role || '普通用户'
+      };
     }
     
-    wx.setStorageSync('auth_token', token);
-    wx.setStorageSync('userInfo', response);
-    wx.setStorageSync('userRole', response.role);
-    wx.setStorageSync('user_openid', response.openid);  // 保存用户openid
+    // 保存到全局数据
+    app.globalData.userInfo = userInfo;
+    app.globalData.isGrid = userInfo.role === '网格员';
+    app.globalData.isArea = userInfo.role === '片区长';
+    app.globalData.token = response.token || response.accessToken;
+    
+    // 保存到本地存储
+    wx.setStorageSync('auth_token', app.globalData.token);
+    wx.setStorageSync('userInfo', userInfo);
+    wx.setStorageSync('userRole', userInfo.role);
+    if (response.openid) {
+      wx.setStorageSync('user_openid', response.openid);
+    }
     
     console.log('数据保存完成，当前存储状态:', {
       token: wx.getStorageSync('auth_token') ? '存在' : '不存在',
@@ -101,6 +106,22 @@ Page({
       userRole: wx.getStorageSync('userRole') ? '存在' : '不存在',
       userOpenid: wx.getStorageSync('user_openid') ? '存在' : '不存在'
     });
+
+    // 根据角色跳转到不同页面
+    if (userInfo.role === '网格员') {
+      wx.reLaunch({
+        url: '/pages/grid/workorder/list'
+      });
+    } else if (userInfo.role === '片区长') {
+      wx.reLaunch({
+        url: '/pages/captain/workorder/list'
+      });
+    } else {
+      // 普通用户跳转到用户工单列表页面
+      wx.reLaunch({
+        url: '/pages/user/workorder/list'
+      });
+    }
   },
 
   // 获取用户信息
@@ -147,19 +168,9 @@ Page({
       
       const response = await userApi.userLogin(code);
       console.log('登录响应:', response);
-      
-      if (!response || !response.role) {
-        throw new Error('用户信息不完整');
-      }
-      
-      // 确保响应中包含 token
-      if (!response.token && !response.accessToken) {
-        console.error('登录响应中没有token:', response);
-        throw new Error('登录响应数据不完整');
-      }
-      
+
+      // 保存用户信息和认证信息，并自动跳转
       this.setGlobalData(response);
-      auth.redirectByRole(response.role);
     } catch (err) {
       console.error('微信登录失败:', err);
       wx.showToast({
@@ -173,30 +184,22 @@ Page({
 
   // 管理员登录
   async handleAdminLogin() {
-    const { username, password } = this.data;
-    if (!username || !password) {
-      wx.showToast({ title: '请输入用户名和密码', icon: 'none' });
+    if (!this.data.username || !this.data.password) {
+      wx.showToast({
+        title: '请输入用户名和密码',
+        icon: 'none'
+      });
       return;
     }
 
-    this.setData({ isLoading: true });
-
+    this.setData({ loading: true });
+    
     try {
-      const response = await userApi.gridLogin(username, password);
+      const response = await userApi.gridLogin(this.data.username, this.data.password);
       console.log('管理员登录响应:', response);
       
-      if (!response || !response.role) {
-        throw new Error('用户信息不完整');
-      }
-      
-      // 确保响应中包含 token
-      if (!response.token && !response.accessToken) {
-        console.error('登录响应中没有token:', response);
-        throw new Error('登录响应数据不完整');
-      }
-      
+      // 保存用户信息和认证信息，并自动跳转
       this.setGlobalData(response);
-      auth.redirectByRole(response.role);
     } catch (err) {
       console.error('管理员登录失败:', err);
       wx.showToast({
@@ -204,7 +207,7 @@ Page({
         icon: 'none'
       });
     } finally {
-      this.setData({ isLoading: false });
+      this.setData({ loading: false });
     }
   }
 }); 

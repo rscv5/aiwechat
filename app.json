@@ -10,7 +10,8 @@
         "pages/captain/workorder/reassign",
         "pages/index/wgwyld",
         "pages/index/indexdetail/comparedetail",
-        "pages/index/indexdetail/activities"
+        "pages/index/indexdetail/activities",
+        "pages/gridUserManage/gridUserManage"
     ],
     "window": {
         "backgroundTextStyle": "light",

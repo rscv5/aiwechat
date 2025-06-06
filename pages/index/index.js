@@ -234,7 +234,6 @@ Page({
   },
 
 
-
   // 网格+物业图片点击
   onPartyTap(e) {
     const id = e.currentTarget.dataset.id;

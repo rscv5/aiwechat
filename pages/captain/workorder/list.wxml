@@ -1,4 +1,14 @@
 <view class="container">
+    <!-- 页面顶部添加管理入口 -->
+    <view class="header">
+        <view class="title">工单列表</view>
+        <view class="actions">
+            <button wx:if="{{isSuperAdmin}}" class="manage-btn" bindtap="navigateToGridManage">
+                网格员管理
+            </button>
+        </view>
+    </view>
+
     <!-- 标签切换（可选，若不需要可移除） -->
     <view class="tabs">
         <view class="tab {{activeTab === 'reported' ? 'active' : ''}}" bindtap="switchTab" data-tab="reported">上报工单</view>
