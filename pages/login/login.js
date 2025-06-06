@@ -6,7 +6,7 @@ const app = getApp()
 Page({
   data: {
     isAdminLogin: false, // 是否是管理员登录
-    username: '',
+    phoneNumber: '',
     password: '',
     loading: false,
     isLoading: false,
@@ -124,19 +124,6 @@ Page({
     }
   },
 
-  // 获取用户信息
-  async getUserInfo(token) {
-    try {
-      const response = await userApi.getUserInfo(token);
-      if (!response || !response.role) {
-        throw new Error('用户信息不完整');
-      }
-      return response;
-    } catch (err) {
-      throw err;
-    }
-  },
-
   // 切换登录方式
   switchLoginType() {
     this.setData({
@@ -144,21 +131,21 @@ Page({
     });
   },
 
-  // 输入用户名
-  onUsernameInput(e) {
+  // 手机号输入处理
+  onPhoneNumberInput(e) {
     this.setData({
-      username: e.detail.value
+      phoneNumber: e.detail.value
     });
   },
 
-  // 输入密码
+  // 密码输入处理
   onPasswordInput(e) {
     this.setData({
       password: e.detail.value
     });
   },
 
-  // 微信登录
+  // 微信登录处理
   async handleWxLogin() {
     this.setData({ isLoading: true });
     
@@ -168,7 +155,7 @@ Page({
       
       const response = await userApi.userLogin(code);
       console.log('登录响应:', response);
-
+      
       // 保存用户信息和认证信息，并自动跳转
       this.setGlobalData(response);
     } catch (err) {
@@ -182,20 +169,30 @@ Page({
     }
   },
 
-  // 管理员登录
+  // 管理员登录处理
   async handleAdminLogin() {
-    if (!this.data.username || !this.data.password) {
+    if (!this.data.phoneNumber || !this.data.password) {
       wx.showToast({
-        title: '请输入用户名和密码',
+        title: '请输入手机号和密码',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(this.data.phoneNumber)) {
+      wx.showToast({
+        title: '请输入正确的手机号',
         icon: 'none'
       });
       return;
     }
 
     this.setData({ loading: true });
-    
+
     try {
-      const response = await userApi.gridLogin(this.data.username, this.data.password);
+      const response = await userApi.gridLogin(this.data.phoneNumber, this.data.password);
       console.log('管理员登录响应:', response);
       
       // 保存用户信息和认证信息，并自动跳转

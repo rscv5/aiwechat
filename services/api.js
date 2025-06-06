@@ -44,14 +44,14 @@ const baseUrl = 'http://127.0.0.1:8080'
 
 export const userApi = {
   // 网格员/片区长登录
-  gridLogin: (username, password) => {
-    console.log('Grid login request:', { username, password });
+  gridLogin: (phoneNumber, password) => {
+    console.log('Grid login request:', { phoneNumber, password });
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/grid/login`,
         method: 'POST',
         data: {
-          username: username,
+          username: phoneNumber, // 后端接口使用 username 字段接收手机号
           password: password
         },
         header: {
@@ -78,7 +78,7 @@ export const userApi = {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${baseUrl}/api/user/login`,
-        method: 'POST',
+      method: 'POST',
         header: {
           'content-type': 'application/json',
           'Accept': 'application/json'

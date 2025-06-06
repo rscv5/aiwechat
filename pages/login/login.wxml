@@ -15,9 +15,11 @@
       <view class="input-group">
         <input 
           class="input" 
-          placeholder="请输入用户名" 
-          value="{{username}}"
-          bindinput="onUsernameInput"
+          placeholder="请输入手机号" 
+          value="{{phoneNumber}}"
+          bindinput="onPhoneNumberInput"
+          type="number"
+          maxlength="11"
         />
         <input 
           class="input" 

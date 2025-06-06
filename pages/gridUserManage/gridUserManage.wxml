@@ -55,7 +55,7 @@
                         重置密码
                     </button>
                     <button class="action-btn delete" bindtap="deleteGridUser" data-id="{{item.userId}}">
-                        删除账号
+                        注销账号
                     </button>
                 </view>
             </view>

@@ -84,7 +84,7 @@ Page({
         status: status,
         baseUrl: app.globalData.baseUrl
       });
-
+      
       const url = `${app.globalData.baseUrl}/api/workorder/user`;
       console.log('发送请求到:', url);
       
@@ -129,7 +129,7 @@ Page({
         const workOrders = workOrdersData.map(order => {
           // 格式化时间（保持原有格式，不做转换）
           const createTime = order.createdAt ? order.createdAt.substring(0, 16).replace('T', ' ') : '未知时间';
-          
+
           return {
             id: order.workId,
             description: order.description || '无描述',
