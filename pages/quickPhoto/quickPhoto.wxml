@@ -103,3 +103,21 @@
 
 <!-- Toast提示 -->
 <van-toast id="van-toast" />
+
+<!-- 隐私授权弹窗 -->
+<view class="privacy-modal" wx:if="{{showPrivacyPopup}}">
+  <view class="privacy-content">
+    <view class="privacy-title">隐私授权说明</view>
+    <view class="privacy-text">
+      <text>为了更好地为您提供服务，我们需要收集以下信息：</text>
+      <text>1. 地理位置信息：用于定位问题发生地点</text>
+      <text>2. 手机号码：用于与您保持联系</text>
+      <text>3. 楼栋号信息：用于准确定位问题区域</text>
+      <text>\n这些信息将仅用于工单处理，我们会严格保护您的隐私安全。您可以随时联系管理员注销账号，注销后相关数据将被删除。</text>
+    </view>
+    <view class="privacy-buttons">
+      <button class="privacy-btn cancel" bindtap="rejectPrivacy">暂不同意</button>
+      <button class="privacy-btn confirm" bindtap="acceptPrivacy">同意并继续</button>
+    </view>
+  </view>
+</view>

@@ -33,7 +33,7 @@
     <block wx:else>
       <view class="wx-login">
         <button class="btn-wx-login" open-type="getUserInfo" bindgetuserinfo="handleWxLogin">
-          <image class="wx-icon" src="/assets/images/wx-icon.png" />
+          <image class="wx-icon" src="/assets/icons/wx-icon.png" />
           <text>微信一键登录</text>
         </button>
       </view>

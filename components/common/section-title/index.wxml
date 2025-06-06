@@ -1,8 +1,0 @@
-<!-- 板块标题组件 -->
-<view class="section-title">
-  <text class="title">{{title}}</text>
-  <view class="more" bindtap="onMoreTap">
-    <text class="more-text">{{moreText}}</text>
-    <image src="/assets/icons/arrow-right.png" class="arrow-icon"/>
-  </view>
-</view> 

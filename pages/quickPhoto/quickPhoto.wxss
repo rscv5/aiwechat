@@ -340,3 +340,69 @@ button,
     flex: 1;
     margin-bottom: 10; /* 避免多余下边距 */
   }
+
+/* 隐私授权弹窗样式 */
+.privacy-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.privacy-content {
+  width: 80%;
+  max-width: 600rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 40rpx;
+}
+
+.privacy-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.privacy-text {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 40rpx;
+}
+
+.privacy-text text {
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.privacy-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.privacy-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+}
+
+.privacy-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.privacy-btn.confirm {
+  background: #07c160;
+  color: #fff;
+}

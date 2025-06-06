@@ -13,7 +13,11 @@ Page({
         building: '',
         phone: '',
         canSubmit: false,
-        submitting: false
+        submitting: false,
+        showPrivacyPopup: false,
+        hasPrivacyAuthorized: false,
+        locationAuth: false,
+        phoneAuth: false
     },
 
     /**
@@ -58,8 +62,9 @@ Page({
             });
             return;
         }
-        console.log('用户已登录，准备获取位置信息');
-        this.getLocation();
+
+        // 检查是否已经授权过
+        this.checkPrivacyAuthorization();
     },
 
     /**
@@ -368,9 +373,88 @@ Page({
         this.setData({ canSubmit: isValid });
     },
 
-    // 提交工单
-    
+    // 检查隐私授权状态
+    async checkPrivacyAuthorization() {
+        const hasPrivacyAuthorized = wx.getStorageSync('privacy_authorized');
+        if (!hasPrivacyAuthorized) {
+            this.setData({ showPrivacyPopup: true });
+            return;
+        }
+
+        // 如果已经授权，检查具体权限
+        const auth = await wx.getSetting();
+        this.setData({
+            hasPrivacyAuthorized: true,
+            locationAuth: auth.authSetting['scope.userLocation'] || false,
+            phoneAuth: auth.authSetting['scope.phoneNumber'] || false
+        });
+
+        // 如果已授权位置权限，获取位置
+        if (auth.authSetting['scope.userLocation']) {
+            this.getLocation();
+        }
+    },
+
+    // 同意隐私政策
+    async acceptPrivacy() {
+        this.setData({ 
+            showPrivacyPopup: false,
+            hasPrivacyAuthorized: true
+        });
+        wx.setStorageSync('privacy_authorized', true);
+        
+        // 请求位置权限
+        try {
+            await wx.authorize({ scope: 'scope.userLocation' });
+            this.setData({ locationAuth: true });
+            this.getLocation();
+        } catch (err) {
+            console.error('位置权限请求失败:', err);
+        }
+    },
+
+    // 拒绝隐私政策
+    rejectPrivacy() {
+        wx.showModal({
+            title: '提示',
+            content: '需要同意隐私政策才能使用随手拍功能',
+            showCancel: false,
+            success: () => {
+                wx.navigateBack();
+            }
+        });
+    },
+
+    // 修改提交方法，添加权限检查
     async submit() {
+        if (!this.data.hasPrivacyAuthorized) {
+            this.setData({ showPrivacyPopup: true });
+            return;
+        }
+
+        if (!this.data.locationAuth) {
+            wx.showModal({
+                title: '需要位置权限',
+                content: '请允许获取位置信息以便准确定位问题',
+                confirmText: '去设置',
+                success: (res) => {
+                    if (res.confirm) {
+                        wx.openSetting();
+                    }
+                }
+            });
+            return;
+        }
+
+        if (!this.data.phone) {
+            wx.showModal({
+                title: '提示',
+                content: '请输入手机号码',
+                showCancel: false
+            });
+            return;
+        }
+
         console.log('baseUrl:', app.globalData.baseUrl);
         console.log('=== 开始提交工单 ===');
         if (this.data.submitting) {

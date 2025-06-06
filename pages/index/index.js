@@ -11,12 +11,14 @@ Page({
     partyActivities: [
       {
         id: 1,
-        cover: '/assets/images/123jizhi.jpg',
+        //cover: '/assets/images/123jizhi.jpg',
+        cover:'https://img.picgo.net/2025/06/03/123jizhi7a52140969699dd4.jpg',
         title: '1+2+3工作机制',
       },
       {
         id: 2,
-        cover: '/assets/images/zuzhijiagou.jpg',
+        cover:'https://img.picgo.net/2025/06/03/zuzhijiagou6ba5fca00a9c3c7c.jpg',
+        //cover: '/assets/images/zuzhijiagou.jpg',
         title: '组织架构图',
       }
     ],
