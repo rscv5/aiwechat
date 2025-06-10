@@ -1,3 +1,4 @@
+import config from '../../../config/api';
 Page({
   data: {
     userInfo: null,
@@ -19,7 +20,8 @@ Page({
   getUserInfo: function() {
     // 获取用户信息
     wx.request({
-      url: 'http://localhost:8080/api/user/info',
+      //url: 'http://localhost:8080/api/user/info',
+      url:`${config.baseURL}/api/user/info`,
       method: 'GET',
       header: {
         'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')

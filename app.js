@@ -1,5 +1,6 @@
 // app.js
 import { userApi } from './services/api'
+import config from './config/api';
 
 App({
   // 全局数据管理
@@ -8,7 +9,8 @@ App({
     token: null,
     isGrid: false,
     isArea: false,
-    baseUrl: 'http://127.0.0.1:8080',  // 使用127.0.0.1替代localhost
+    //baseUrl: 'http://127.0.0.1:8080',  // 使用127.0.0.1替代localhost
+    baseUrl: config.baseURL,
     user: null,
     communityInfo: {
       name: '明发社区欢迎您',

@@ -56,7 +56,7 @@ Page({
       wx.reLaunch({
         url: '/pages/captain/workorder/list'
       });
-    } else {
+      } else {
       // 普通用户跳转到用户工单列表页面
       console.log('普通用户跳转到工单列表页面');
       wx.reLaunch({

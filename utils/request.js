@@ -1,7 +1,9 @@
 import authService from '../services/auth';
 
 // 基础URL
-const BASE_URL = 'http://localhost:8080';
+//const BASE_URL = 'http://localhost:8080';
+import config from '../config/api';
+const BASE_URL = config.baseURL;
 
 /**
  * 请求工具类

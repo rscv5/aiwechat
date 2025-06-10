@@ -1,4 +1,6 @@
 import request from '../utils/request'
+import config from '../config/api';
+
 // API接口服务
 // 社区相关接口
 export const communityApi = {
@@ -40,7 +42,8 @@ export const workOrderApi = {
 }
 
 // 用户相关接口
-const baseUrl = 'http://127.0.0.1:8080'
+//const baseUrl = 'http://127.0.0.1:8080'
+const baseUrl = config.baseURL;
 
 export const userApi = {
   // 网格员/片区长登录

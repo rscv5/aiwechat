@@ -2,14 +2,41 @@ const app = getApp();
 import { API, formatDate } from '../../constants/index';
 const auth = require('../../utils/auth');
 
-// 明发社区的地理边界（多边形顶点坐标）
+// 坐标转换工具函数
+// 百度坐标 (BD-09) 转换为 国测局坐标 (GCJ-02)
+const x_pi = 3.14159265358979324 * 3000.0 / 180.0;
+function bd09togcj02(bd_lon, bd_lat) {
+    const x = bd_lon - 0.0065;
+    const y = bd_lat - 0.006;
+    const z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
+    const theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);
+    const gg_lng = z * Math.cos(theta);
+    const gg_lat = z * Math.sin(theta);
+    return {
+        latitude: gg_lat,
+        longitude: gg_lng
+    };
+}
+
+// 明发社区的地理边界（多边形顶点坐标，使用GCJ-02坐标系）
 const MINGFA_BOUNDARY = {
     name: "明发社区",
     points: [
-        { latitude: 32.139863, longitude: 118.758625 }, // 东边界（长江）
-        { latitude: 32.127578, longitude: 118.744261 }, // 西边界（明发三期北片与桥北社区交界）
-        { latitude: 32.127105, longitude: 118.746111 }, // 南边界（京沪铁路/长江大桥）
-        { latitude: 32.141789, longitude: 118.752283}  // 北边界（引水河与沿江街道交界）
+        // 从上到下，顺时针采集的14个点 (百度坐标BD-09，微信小程序wx.getLocation为GCJ-02，通常可以忽略小范围误差)
+        { latitude: 32.142425, longitude: 118.748561 },
+        { latitude: 32.141844, longitude: 118.752119 },
+        { latitude: 32.140805, longitude: 118.755748 },
+        { latitude: 32.139857, longitude: 118.758551 },
+        { latitude: 32.137472, longitude: 118.756467 },
+        { latitude: 32.133956, longitude: 118.752801 },
+        { latitude: 32.131204, longitude: 118.750538 },
+        { latitude: 32.127106, longitude: 118.746118 },
+        { latitude: 32.12781, longitude: 118.744214 },
+        { latitude: 32.131724, longitude: 118.745651 },
+        { latitude: 32.132152, longitude: 118.746909 },
+        { latitude: 32.133283, longitude: 118.74716 },
+        { latitude: 32.136127, longitude: 118.747376 },
+        { latitude: 32.139337, longitude: 118.747915 }
     ]
 };
 
@@ -30,7 +57,8 @@ Page({
         hasPrivacyAuthorized: false,
         locationAuth: false,
         phoneAuth: false,
-        isInCommunity: false  // 新增：是否在社区范围内
+        isInCommunity: false,  // 新增：是否在社区范围内
+        convertedBoundaryPoints: [] // 新增：存储转换后的边界点
     },
 
     /**
@@ -49,6 +77,15 @@ Page({
             });
             return;
         }
+
+        // 转换明发社区边界坐标为GCJ-02
+        const convertedPoints = MINGFA_BOUNDARY.points.map(point => {
+            return bd09togcj02(point.longitude, point.latitude);
+        });
+        this.setData({
+            convertedBoundaryPoints: convertedPoints
+        });
+        console.log('转换后的社区边界 (GCJ-02):', JSON.stringify(this.data.convertedBoundaryPoints, null, 2));
 
         // 检查是否已经授权过
         this.checkPrivacyAuthorization();
@@ -218,16 +255,44 @@ Page({
 
     // 判断点是否在多边形内（射线法）
     isPointInPolygon(point, polygon) {
+        console.log('=== 开始判断点是否在多边形内 ===');
+        console.log('待判断的点:', point);
+        console.log('多边形顶点:', polygon);
+        
         let inside = false;
         for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
             const xi = polygon[i].longitude, yi = polygon[i].latitude;
             const xj = polygon[j].longitude, yj = polygon[j].latitude;
             
+            console.log(`判断边 ${j}->${i}:`, {
+                '边起点': { latitude: yj, longitude: xj },
+                '边终点': { latitude: yi, longitude: xi },
+                '待判断点': point
+            });
+            
+            // 修改判断条件，增加容错率
             const intersect = ((yi > point.latitude) !== (yj > point.latitude))
-                && (point.longitude < (xj - xi) * (point.latitude - yi) / (yj - yi) + xi);
+                && (point.longitude <= (xj - xi) * (point.latitude - yi) / (yj - yi) + xi);
+            
+            console.log(`边 ${j}->${i} 的判断结果:`, intersect);
             if (intersect) inside = !inside;
         }
-        return inside;
+        
+        // 添加容错判断
+        const tolerance = 0.001; // 约100米的容错范围
+        const isNearBoundary = polygon.some((vertex, i) => {
+            const nextVertex = polygon[(i + 1) % polygon.length];
+            const distance = Math.sqrt(
+                Math.pow(vertex.latitude - point.latitude, 2) +
+                Math.pow(vertex.longitude - point.longitude, 2)
+            );
+            return distance < tolerance;
+        });
+        
+        console.log('是否在边界附近:', isNearBoundary);
+        console.log('最终判断结果:', inside || isNearBoundary);
+        
+        return inside || isNearBoundary;
     },
 
     // 修改获取位置信息方法
@@ -269,7 +334,7 @@ Page({
                     fail: reject
                 });
             });
-            console.log('位置信息:', locationRes);
+            console.log('获取到的原始位置信息:', locationRes);
 
             if (!locationRes || !locationRes.latitude || !locationRes.longitude) {
                 throw new Error('获取位置信息失败');
@@ -280,9 +345,22 @@ Page({
                 latitude: locationRes.latitude,
                 longitude: locationRes.longitude
             };
-            const isInCommunity = this.isPointInPolygon(userPoint, MINGFA_BOUNDARY.points);
+            console.log('=== 位置判断信息 ===');
+            console.log('用户当前位置 (GCJ-02):', JSON.stringify(userPoint));
+            console.log('明发社区边界 (GCJ-02):', JSON.stringify(this.data.convertedBoundaryPoints, null, 2));
+            console.log('边界点数量:', this.data.convertedBoundaryPoints.length);
+            
+            // 添加位置精度检查
+            console.log('位置精度:', locationRes.accuracy);
+            if (locationRes.accuracy > 100) { // 如果精度大于100米
+                console.log('位置精度较低，使用容错判断');
+            }
+            
+            const isInCommunity = this.isPointInPolygon(userPoint, this.data.convertedBoundaryPoints);
+            console.log('是否在社区范围内:', isInCommunity);
             
             if (!isInCommunity) {
+                console.log('用户不在社区范围内，准备返回');
                 this.setData({ 
                     location: '',
                     locationLoading: false,

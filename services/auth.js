@@ -1,3 +1,4 @@
+import config from '../config/api';
 // 认证服务
 const authService = {
   // 存储用户信息的key
@@ -15,7 +16,8 @@ const authService = {
       
       // 调用后端登录接口
       const res = await wx.request({
-        url: 'http://localhost:8080/api/user/login',
+        //url: 'http://localhost:8080/api/user/login',
+        url:`${config.baseURL}/api/user/login`,
         method: 'POST',
         data: { code },
         header: {
@@ -46,7 +48,8 @@ const authService = {
   async adminLogin(username, password) {
     try {
       const res = await wx.request({
-        url: 'http://localhost:8080/api/grid/login',
+        //url: 'http://localhost:8080/api/grid/login',
+        url:`${config.baseURL}/api/grid/login`,
         method: 'POST',
         data: { username, password },
         header: {
