@@ -13,8 +13,8 @@ page {
   color: var(--text-body);
   background: var(--primary-bg);
   box-sizing: border-box;
-  height: 100vh;
-  overflow: hidden;
+  /* height: 100vh; */
+  /* overflow: hidden; */
 }
 
 .container {

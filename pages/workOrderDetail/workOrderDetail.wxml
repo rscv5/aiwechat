@@ -143,7 +143,7 @@
   </view>
 
   <!-- 反馈弹窗 -->
-  <view class="feedback-modal {{showFeedbackModal ? 'show' : ''}}" wx:if="{{userRole === '网格员'}}">
+  <view class="feedback-modal {{showFeedbackModal ? 'show' : ''}}" wx:if="{{showFeedbackModal}}">
     <view class="modal-content">
       <view class="modal-header">
         <text class="modal-title">工单反馈</text>
