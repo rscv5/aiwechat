@@ -208,7 +208,7 @@ export const userApi = {
 export function submitFeedback({ workId, handledDesc, handledImages }) {
   return new Promise((resolve, reject) => {
     wx.request({
-      url: 'http://127.0.0.1:8080/api/gridworker/feedback', // 本地SpringBoot后端接口
+      url: `${config.baseURL}/api/gridworker/feedback`, // 使用配置的baseURL
       method: 'POST',
       header: {
         'Authorization': 'Bearer ' + wx.getStorageSync('auth_token'),
