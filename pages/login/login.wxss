@@ -1,10 +1,13 @@
 .container {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  height: 100vh; /* 确保背景覆盖整个视口 */
   background-color: #f5f5f5;
+  /* 移除所有flex布局相关，确保不会干扰fixed定位的子元素 */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* overflow: hidden; */
+  /* min-height: 100vh; */
 }
 
 .header {
@@ -29,12 +32,19 @@
 }
 
 .login-box {
+  position: fixed; /* 强制固定定位 */
+  top: 10%;    /* 顶部固定为0 */
+  bottom: 0; /* 底部固定为0 */
+  left: 0;   /* 左侧固定为0 */
+  right: 0;  /* 右侧固定为0 */
+  margin: auto; /* 自动计算外边距实现居中 */
   width: 90%;
   max-width: 400px;
   padding: 30px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
 .login-type {

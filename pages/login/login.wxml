@@ -20,6 +20,7 @@
           bindinput="onPhoneNumberInput"
           type="number"
           maxlength="11"
+          adjust-position="false"
         />
         <input 
           class="input" 
@@ -27,6 +28,7 @@
           placeholder="请输入密码" 
           value="{{password}}"
           bindinput="onPasswordInput"
+          adjust-position="false"
         />
       </view>
       <button class="btn-login" bindtap="handleAdminLogin">登录</button>

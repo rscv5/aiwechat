@@ -146,12 +146,12 @@ Page({
     const { index, type } = e.currentTarget.dataset;
     let urls = [];
     if (type === 'workOrder') {
-      urls = (this.data.workOrder.imageUrls || []).map(url => url.startsWith('http') ? url : `${app.globalData.baseUrl}${url}`);
+      urls = this.data.workOrder.imageUrls || [];
     } else if (type === 'handled') {
       urls = this.data.handledImages || [];
     } else if (type === 'feedback') {
       const feedback = this.data.workOrder.feedbackList[index];
-      urls = (feedback.feedbackImages || []).map(url => url.startsWith('http') ? url : `${app.globalData.baseUrl}${url}`);
+      urls = feedback.feedbackImages || [];
     }
     if (urls.length > 0) {
       wx.previewImage({

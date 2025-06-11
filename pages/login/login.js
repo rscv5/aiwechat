@@ -67,8 +67,7 @@ Page({
 
   // 设置全局数据
   setGlobalData(response) {
-    console.log('=== 设置全局数据 ===');
-    console.log('登录响应数据:', response);
+    console.log('=== 设置全局数据 - 原始响应 ===', response);
     
     // 处理不同的响应结构
     let userInfo;
@@ -82,10 +81,13 @@ Page({
       // 普通用户登录响应
       userInfo = {
         ...response,
-        role: response.role || '普通用户'
+        role: response.role || '普通用户',
+        openid: response.openid || wx.getStorageSync('user_openid') || '' // 确保 openid 被包含在 userInfo 中，如果 response 中没有，则从 user_openid 中获取，如果 user_openid 中也没有，则设置为空字符串
       };
     }
     
+    console.log('=== 设置全局数据 - 准备保存的userInfo ===', userInfo);
+
     // 保存到全局数据
     app.globalData.userInfo = userInfo;
     app.globalData.isGrid = userInfo.role === '网格员';
@@ -96,13 +98,14 @@ Page({
     wx.setStorageSync('auth_token', app.globalData.token);
     wx.setStorageSync('userInfo', userInfo);
     wx.setStorageSync('userRole', userInfo.role);
+    // 这里的 response.openid 是为了兼容旧的 user_openid 存储，新逻辑应确保 userInfo 中包含 openid
     if (response.openid) {
       wx.setStorageSync('user_openid', response.openid);
     }
     
     console.log('数据保存完成，当前存储状态:', {
       token: wx.getStorageSync('auth_token') ? '存在' : '不存在',
-      userInfo: wx.getStorageSync('userInfo') ? '存在' : '不存在',
+      userInfo: wx.getStorageSync('userInfo') ? wx.getStorageSync('userInfo') : '不存在',
       userRole: wx.getStorageSync('userRole') ? '存在' : '不存在',
       userOpenid: wx.getStorageSync('user_openid') ? '存在' : '不存在'
     });

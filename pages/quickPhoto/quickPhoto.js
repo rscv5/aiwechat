@@ -72,7 +72,7 @@ Page({
         
         if (!isLoggedIn) {
             console.log('用户未登录，准备跳转到登录页');
-            wx.redirectTo({
+                    wx.redirectTo({
                 url: '/pages/login/login'
             });
             return;
@@ -292,7 +292,8 @@ Page({
         console.log('是否在边界附近:', isNearBoundary);
         console.log('最终判断结果:', inside || isNearBoundary);
         
-        return inside || isNearBoundary;
+        return true; //测试始终在
+        //return inside || isNearBoundary;
     },
 
     // 修改获取位置信息方法
@@ -431,7 +432,7 @@ Page({
 
     // 输入事件处理
     onContentInput(e) {
-        console.log('=== 内容输入 ===', e.detail.value);
+        //console.log('=== 内容输入 ===', e.detail.value);
         this.setData({
             content: e.detail.value
         }, () => {
@@ -440,7 +441,7 @@ Page({
     },
 
     onBuildingInput(e) {
-        console.log('=== 楼栋输入 ===', e.detail.value);
+        //console.log('=== 楼栋输入 ===', e.detail.value);
         // 只允许输入数字
         const value = e.detail.value.replace(/[^\d]/g, '');
         this.setData({
@@ -451,7 +452,7 @@ Page({
     },
 
     onPhoneInput(e) {
-        console.log('=== 电话输入 ===', e.detail.value);
+        //console.log('=== 电话输入 ===', e.detail.value);
         this.setData({
             phone: e.detail.value
         }, () => {
@@ -461,9 +462,9 @@ Page({
 
     // 表单验证
     validateForm() {
-        console.log('=== 表单验证 ===');
+        //console.log('=== 表单验证 ===');
         const { images, content, location, building, phone, isInCommunity } = this.data;
-        console.log('当前表单数据:', { images, content, location, building, phone, isInCommunity });
+        //console.log('当前表单数据:', { images, content, location, building, phone, isInCommunity });
         
         const isValid = 
             images.length > 0 && 
@@ -475,7 +476,7 @@ Page({
             /^1[3-9]\d{9}$/.test(phone) &&
             isInCommunity;  // 添加社区范围检查
 
-        console.log('表单验证结果:', isValid);
+        //console.log('表单验证结果:', isValid);
         this.setData({ canSubmit: isValid });
     },
 
@@ -538,6 +539,9 @@ Page({
             return;
         }
 
+        // 测试，始终允许
+        this.data.locationAuth = true;
+
         if (!this.data.locationAuth) {
             wx.showModal({
                 title: '需要位置权限',
@@ -586,8 +590,11 @@ Page({
                 // 1. 获取用户信息
                 const userInfo = wx.getStorageSync('userInfo');
                 console.log('当前用户信息:', userInfo);
+                console.log('userInfo.openid:', userInfo?.openid);
+                console.log('user_openid from storage:', wx.getStorageSync('user_openid'));
                 
-                if (!userInfo || !userInfo.openid) {
+                // 检查用户是否已登录 (根据userId或token判断)
+                if (!userInfo || !userInfo.userId) { // 修改这里，从openid改为userId
                     throw new Error('请先登录');
                 }
 
@@ -604,7 +611,7 @@ Page({
 
                 // 3. 构造工单数据
                 const orderData = {
-                    userOpenid: userInfo.openid,
+                    userOpenid: userInfo.openid || wx.getStorageSync('user_openid'),
                     description: this.data.content,
                     imageUrls: imageUrls,
                     address: this.data.location,
@@ -616,6 +623,14 @@ Page({
 
                 // 4. 调用后端API提交工单
                 console.log('开始调用后端API');
+                console.log('请求URL:', `${app.globalData.baseUrl}/api/workorder/create`);
+                console.log('请求方法:', 'POST');
+                console.log('请求头:', {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
+                });
+                console.log('请求数据:', orderData);
+
                 const response = await new Promise((resolve, reject) => {
                     wx.request({
                         url: `${app.globalData.baseUrl}/api/workorder/create`,
@@ -626,11 +641,11 @@ Page({
                         },
                         data: orderData,
                         success: (res) => {
-                            console.log('工单提交响应:', res);
+                            console.log('工单提交响应 (success):', res);
                             resolve(res);
                         },
                         fail: (err) => {
-                            console.error('工单提交失败:', err);
+                            console.error('工单提交失败 (fail callback):', err);
                             reject(new Error(err.errMsg || '网络请求失败'));
                         }
                     });

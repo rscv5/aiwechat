@@ -17,7 +17,8 @@
         "backgroundTextStyle": "light",
         "navigationBarBackgroundColor": "#fff",
         "navigationBarTitleText": "互动明发",
-        "navigationBarTextStyle": "black"
+        "navigationBarTextStyle": "black",
+        "keyboardAdjust": "none"
     },
     "tabBar": {
         "color": "#999",
