@@ -67,11 +67,11 @@
     </view>
     <!-- 联系方式 -->
     <view class="phone-row">
-        <text>联系电话:</text>
+        <text>回访号码:</text>
         <view class="input-field">
             <input 
             type="number" 
-            placeholder="请输入联系电话" 
+            placeholder="请输入号码" 
             value="{{phone}}" 
             bindinput="onPhoneInput"
             maxlength="11"

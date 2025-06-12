@@ -87,7 +87,7 @@ Page({
     }
     
     console.log('=== 设置全局数据 - 准备保存的userInfo ===', userInfo);
-
+    
     // 保存到全局数据
     app.globalData.userInfo = userInfo;
     app.globalData.isGrid = userInfo.role === '网格员';
