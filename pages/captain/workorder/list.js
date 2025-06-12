@@ -51,6 +51,9 @@ Page({
     async loadOrders() {
         try {
             this.setData({ isLoading: true, error: null });
+            // 添加日志，确认当前活跃的Tab类型
+            console.log('当前活跃的Tab:', this.data.activeTab);
+
             const res = await request.request({
                 url: '/api/captain/workorders',
                 method: 'GET',
@@ -59,9 +62,15 @@ Page({
                 }
             });
             
-            if (res && res.code === 200) {
-                // 格式化时间和状态映射
-                const orders = res.data.map(order => {
+            // 添加日志，确认从后端收到的原始数据
+            console.log('从后端收到的原始工单数据 (res):', res);
+
+            // 确保 res 是一个数组，即使后端返回空数组或 null，也将其视为空数组
+            const ordersData = Array.isArray(res.data) ? res.data : [];
+            console.log('处理后的工单数据 (ordersData):', ordersData);
+
+            // 格式化时间和状态映射
+            const orders = ordersData.map(order => {
                     let statusEn = this.data.statusEnMap[order.status] || 'unclaimed';
                     let statusCn = this.data.statusMap[statusEn] || order.status;
                     return {
@@ -92,9 +101,6 @@ Page({
                 });
 
                 this.setData({ orders });
-            } else {
-                throw new Error(res?.message || '获取工单列表失败');
-            }
         } catch (error) {
             this.setData({ 
                 error: error.message || '获取工单列表失败，请稍后重试'
@@ -159,54 +165,40 @@ Page({
             }
 
             console.log('开始请求用户信息, token:', token);
-            const res = await new Promise((resolve, reject) => {
-                wx.request({
-                    url: `${getApp().globalData.baseUrl}/api/user/info`,
-                    method: 'GET',
-                    header: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    success: (res) => {
-                        console.log('请求成功，状态码:', res.statusCode);
-                        console.log('响应数据:', res.data);
-                        resolve(res);
-                    },
-                    fail: (err) => {
-                        console.error('请求失败:', err);
-                        reject(err);
-                    }
-                });
+            const app = getApp();
+            const res = await app.call({
+                path: '/api/user/info',
+                method: 'GET',
+                header: {
+                    'Authorization': `Bearer ${token}`,
+                }
             });
 
-            if (res.statusCode === 200 && res.data) {
-                console.log('获取到新的用户信息:', res.data);
+            // app.call 成功返回的是业务数据，无需再判断 statusCode 和 res.data
+            if (res) {
+                console.log('获取到新的用户信息:', res);
                 // 更新存储的用户信息
                 const updatedUserInfo = {
                     ...wx.getStorageSync('userInfo'),
-                    ...res.data
+                    ...res
                 };
                 console.log('更新后的用户信息:', updatedUserInfo);
                 wx.setStorageSync('userInfo', updatedUserInfo);
                 
                 // 更新页面状态
                 this.setData({
-                    isSuperAdmin: res.data.isSuperAdmin === true
+                    isSuperAdmin: res.isSuperAdmin === true
                 });
-                console.log('页面状态已更新, isSuperAdmin:', res.data.isSuperAdmin);
+                console.log('页面状态已更新, isSuperAdmin:', res.isSuperAdmin);
             } else {
                 console.error('获取用户信息失败:', res);
-                if (res.statusCode === 403) {
-                    // token 可能过期，尝试重新登录
-                    wx.redirectTo({
-                        url: '/pages/login/login'
-                    });
-                }
+                // 如果是未登录或token过期，app.call会跳转到登录页
+                // 这里无需额外处理403，因为getApp().call()会统一处理
             }
         } catch (error) {
             console.error('刷新用户信息失败:', error);
             wx.showToast({
-                title: '获取用户信息失败',
+                title: error.message || '刷新用户信息失败',
                 icon: 'none',
                 duration: 2000
             });

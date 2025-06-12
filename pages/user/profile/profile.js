@@ -17,24 +17,30 @@ Page({
     }
   },
 
-  getUserInfo: function() {
+  getUserInfo: async function() {
     // 获取用户信息
-    wx.request({
-      //url: 'http://localhost:8080/api/user/info',
-      url:`${config.baseURL}/api/user/info`,
-      method: 'GET',
-      header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
-      },
-      success: (res) => {
-        if (res.data.code === 200) {
-          this.setData({
-            userInfo: res.data.data,
-            hasUserInfo: true
-          });
-        }
+    try {
+      const app = getApp();
+      const res = await app.call({
+        path: '/api/user/info',
+        method: 'GET',
+      });
+
+      // app.call 成功返回的是业务数据，无需再判断 statusCode 和 code
+      if (res) {
+        this.setData({
+          userInfo: res,
+          hasUserInfo: true
+        });
       }
-    });
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+      wx.showToast({
+        title: error.message || '获取用户信息失败',
+        icon: 'none',
+        duration: 2000
+      });
+    }
   },
 
   // 退出登录

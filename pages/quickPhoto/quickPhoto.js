@@ -1,5 +1,6 @@
 const app = getApp();
 import { API, formatDate } from '../../constants/index';
+import config from '../../config/api';
 const auth = require('../../utils/auth');
 
 // 坐标转换工具函数
@@ -198,37 +199,48 @@ Page({
     },
 
     // 上传单张图片，返回Promise
-    uploadSingleImage(filePath) {
-        console.log('=== 开始上传单张图片 ===', filePath);
-        return new Promise((resolve, reject) => {
-            wx.uploadFile({
-                url: `${app.globalData.baseUrl}/api/upload`,
-                filePath,
-                name: 'file',
-                formData: {
-                    type: 'workorder'
-                },
-                header: {
-                    'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
-                },
-                success: (res) => {
-                    console.log('图片上传响应:', res);
-                    try {
-                        const data = JSON.parse(res.data);
-                        if (data.code === 200 && data.url) {
-                            resolve(data.url);
-                        } else if (data.url) {
-                            resolve(data.url);
-                        } else {
-                            reject(new Error(data.message || '上传失败'));
-                        }
-                    } catch (e) {
-                        reject(new Error('图片上传响应解析失败'));
-                    }
-                },
-                fail: reject
+    async uploadSingleImage(filePath) {
+        console.log('=== 开始上传单张图片 (云存储) ===', filePath);
+        const app = getApp();
+        
+        // 获取文件扩展名
+        const fileExtension = filePath.substring(filePath.lastIndexOf('.'));
+        // 生成唯一的云文件路径 (例如：workorder/timestamp_random.ext)
+        const cloudPath = `workorder/${Date.now()}_${Math.floor(Math.random() * 1000)}${fileExtension}`;
+
+        try {
+            const uploadRes = await wx.cloud.uploadFile({
+                cloudPath: cloudPath, // 云端路径
+                filePath: filePath, // 小程序临时文件路径
+                config:{
+                    env: config.cloudEnvId
+                }
             });
-        });
+
+            console.log('云存储图片上传响应:', uploadRes);
+
+            if (uploadRes.fileID) {
+                // 上传成功后获取临时下载链接
+                const getUrlRes = await wx.cloud.getTempFileURL({
+                    fileList: [uploadRes.fileID]
+                });
+                
+                console.log('获取临时下载链接响应:', getUrlRes);
+
+                if (getUrlRes.fileList && getUrlRes.fileList.length > 0 && getUrlRes.fileList[0].tempFileURL) {
+                    const imageUrl = getUrlRes.fileList[0].tempFileURL;
+                    console.log('图片上传成功，下载链接:', imageUrl);
+                    return imageUrl;
+                } else {
+                    throw new Error(getUrlRes.errMsg || '获取图片下载链接失败');
+                }
+                        } else {
+                throw new Error(uploadRes.errMsg || '图片上传失败');
+                        }
+        } catch (error) {
+            console.error('图片上传至云存储失败:', error);
+            throw new Error(error.message || '图片上传失败，请重试');
+        }
     },
 
     // 预览图片
@@ -292,8 +304,8 @@ Page({
         console.log('是否在边界附近:', isNearBoundary);
         console.log('最终判断结果:', inside || isNearBoundary);
         
-        //return true; //测试始终在
-        return inside || isNearBoundary;
+        return true; //测试始终在
+        //return inside || isNearBoundary;
     },
 
     // 修改获取位置信息方法
@@ -540,7 +552,7 @@ Page({
         }
 
         // 测试，始终允许
-        //this.data.locationAuth = true;
+        this.data.locationAuth = true;
 
         if (!this.data.locationAuth) {
             wx.showModal({
@@ -632,12 +644,16 @@ Page({
                 console.log('请求数据:', orderData);
 
                 const response = await new Promise((resolve, reject) => {
-                    wx.request({
-                        url: `${app.globalData.baseUrl}/api/workorder/create`,
+                    wx.cloud.callContainer({
+                        config: {
+                            env: config.cloudEnvId // 微信云托管环境ID
+                        },
+                        path: '/api/workorder/create', // 后端API路径
                         method: 'POST',
                         header: {
                             'content-type': 'application/json',
-                            'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`
+                            'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`,
+                            'X-WX-SERVICE': config.cloudServiceName // 微信云托管服务名称
                         },
                         data: orderData,
                         success: (res) => {

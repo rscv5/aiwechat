@@ -57,29 +57,15 @@ Page({
                 throw new Error('未找到认证信息');
             }
 
-            const res = await new Promise((resolve, reject) => {
-                wx.request({
-                    url: `${app.globalData.baseUrl}/api/grid-users`,
-                    method: 'GET',
-                    header: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    success: (res) => {
-                        console.log('获取网格员列表响应:', res);
-                        resolve(res);
-                    },
-                    fail: (err) => {
-                        console.error('获取网格员列表失败:', err);
-                        reject(err);
-                    }
-                });
+            const res = await app.call({
+                path: '/api/grid-users',
+                method: 'GET',
             });
 
-            if (res.statusCode === 200) {
-                console.log('成功获取网格员列表:', res.data);
+            if (res) {
+                console.log('成功获取网格员列表:', res);
                 // 处理时间格式
-                const gridUsers = res.data.map(user => ({
+                const gridUsers = res.map(user => ({
                     ...user,
                     createTime: user.createTime ? formatDate(user.createTime) : '暂无',
                     lastLoginTime: user.lastLoginTime ? formatDate(user.lastLoginTime) : '暂无'
@@ -89,7 +75,7 @@ Page({
                     isLoading: false
                 });
             } else {
-                throw new Error(res.data?.message || '获取网格员列表失败');
+                throw new Error('获取网格员列表失败');
             }
         } catch (error) {
             console.error('加载网格员列表失败:', error);
@@ -149,31 +135,17 @@ Page({
         }
 
         try {
-            const result = await new Promise((resolve, reject) => {
-                wx.request({
-                    url: `${app.globalData.baseUrl}/api/grid-users`,
-                    method: 'POST',
-                    header: {
-                        'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    data: {
-                        username,
-                        phoneNumber,
-                        role: '网格员'
-                    },
-                    success: (res) => {
-                        console.log('添加网格员响应:', res);
-                        resolve(res);
-                    },
-                    fail: (err) => {
-                        console.error('添加网格员请求失败:', err);
-                        reject(err);
-                    }
-                });
+            const result = await app.call({
+                path: '/api/grid-users',
+                method: 'POST',
+                data: {
+                    username,
+                    phoneNumber,
+                    role: '网格员'
+                }
             });
 
-            if (result.statusCode === 200 && result.data.code === 200) {
+            if (result) {
                 wx.showModal({
                     title: '添加成功',
                     content: `网格员账号已创建，初始密码为：Mf654321`,
@@ -184,7 +156,7 @@ Page({
                     }
                 });
             } else {
-                throw new Error(result.data?.message || '添加失败');
+                throw new Error('添加失败');
             }
         } catch (error) {
             console.error('添加网格员失败:', error);
@@ -205,26 +177,12 @@ Page({
             success: async (res) => {
                 if (res.confirm) {
                     try {
-                        const result = await new Promise((resolve, reject) => {
-                            wx.request({
-                                url: `${app.globalData.baseUrl}/api/grid-users/${userId}`,
-                                method: 'DELETE',
-                                header: {
-                                    'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`,
-                                    'Content-Type': 'application/json'
-                                },
-                                success: (res) => {
-                                    console.log('停用网格员响应:', res);
-                                    resolve(res);
-                                },
-                                fail: (err) => {
-                                    console.error('停用网格员请求失败:', err);
-                                    reject(err);
-                                }
-                            });
+                        const result = await app.call({
+                            path: `/api/grid-users/${userId}`,
+                            method: 'DELETE',
                         });
 
-                        if (result.statusCode === 200) {
+                        if (result) {
                             wx.showToast({
                                 title: '停用成功',
                                 icon: 'success',
@@ -233,7 +191,7 @@ Page({
                             // 重新加载列表
                             await this.loadGridUsers();
                         } else {
-                            throw new Error(result.data?.message || '停用失败');
+                            throw new Error('停用失败');
                         }
                     } catch (error) {
                         console.error('停用网格员失败:', error);
@@ -252,44 +210,31 @@ Page({
     async resetPassword(e) {
         const userId = e.currentTarget.dataset.id;
         wx.showModal({
-            title: '确认重置',
-            content: '确定要重置该网格员的密码吗？重置后密码将变为：Mf654321',
+            title: '重置密码',
+            content: '确定要将该网格员的密码重置为初始密码 (Mf654321) 吗？',
             success: async (res) => {
                 if (res.confirm) {
                     try {
-                        const result = await new Promise((resolve, reject) => {
-                            wx.request({
-                                url: `${app.globalData.baseUrl}/api/grid-users/${userId}/reset-password`,
-                                method: 'POST',
-                                header: {
-                                    'Authorization': `Bearer ${wx.getStorageSync('auth_token')}`,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-                                success: (res) => {
-                                    console.log('重置密码响应:', res);
-                                    resolve(res);
-                                },
-                                fail: (err) => {
-                                    console.error('重置密码请求失败:', err);
-                                    reject(err);
-                                }
-                            });
+                        const app = getApp();
+                        const result = await app.call({
+                            path: `/api/grid-users/${userId}/reset-password`,
+                            method: 'POST',
                         });
 
-                        if (result.statusCode === 200 && result.data.code === 200) {
-                            wx.showModal({
-                                title: '重置成功',
-                                content: '密码已重置为：Mf654321',
-                                showCancel: false
+                        // app.call 成功返回的是业务数据，无需再判断 statusCode 和 res.data
+                        if (result) {
+                            wx.showToast({
+                                title: '密码已重置',
+                                icon: 'success',
+                                duration: 2000
                             });
                         } else {
-                            throw new Error(result.data?.message || '重置失败');
+                            throw new Error('密码重置失败');
                         }
                     } catch (error) {
                         console.error('重置密码失败:', error);
                         wx.showToast({
-                            title: error.message || '重置失败',
+                            title: error.message || '密码重置失败',
                             icon: 'none',
                             duration: 2000
                         });

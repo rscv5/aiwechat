@@ -1,4 +1,20 @@
-const { userApi } = require('../services/api');
+// const { userApi } = require('../services/api'); // 移除此行
+
+// JWT解析函数 (与workOrderDetail.js中的相同，确保一致性)
+function parseJwt(token) {
+  if (!token) return null;
+  try {
+    const base664Url = token.split('.')[1];
+    const base64 = base664Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error("Error parsing JWT token:", e);
+    return null;
+  }
+}
 
 // 检查登录状态
 const checkLogin = () => {

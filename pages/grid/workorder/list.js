@@ -108,45 +108,51 @@ Page({
                 }
             });
             
+            console.log('原始工单数据:', res); // 打印完整的后端响应
+
+            let orders = []; // 初始化为一个空数组，确保后续操作安全
             if (res && res.code === 200) {
-                console.log('原始工单数据:', res.data);
-                // 格式化时间和状态映射
-                const orders = res.data.map(order => {
-                    // 强制映射英文状态
-                    let statusEn = this.data.statusEnMap[order.status] || 'unclaimed';
-                    let statusCn = this.data.statusMap[statusEn] || order.status;
-                    return {
-                        ...order,
-                        createdAt: formatDate(order.createdAt),
-                        updatedAt: order.updatedAt ? formatDate(order.updatedAt) : '',
-                        statusEn,
-                        statusCn
-                    };
-                });
-                // 排序逻辑用英文
-                orders.sort((a, b) => {
-                    // 未领取排最前
-                    if (a.statusEn === 'unclaimed' && b.statusEn !== 'unclaimed') return -1;
-                    if (a.statusEn !== 'unclaimed' && b.statusEn === 'unclaimed') return 1;
-                    // 处理完排最后
-                    if (a.statusEn === 'completed' && b.statusEn !== 'completed') return 1;
-                    if (a.statusEn !== 'completed' && b.statusEn === 'completed') return -1;
-                    // 处理中/已上报按 updatedAt 降序
-                    if (a.statusEn === b.statusEn) {
-                        // 兼容iOS日期格式，将横线替换为斜线
-                        const aDateString = (a.updatedAt || a.createdAt).replace(/-/g, '/');
-                        const bDateString = (b.updatedAt || b.createdAt).replace(/-/g, '/');
-                        const aTime = new Date(aDateString).getTime();
-                        const bTime = new Date(bDateString).getTime();
-                        return bTime - aTime;
-                    }
-                    return 0;
-                });
-                console.log('处理后的工单数据:', orders);
-                this.setData({ orders });
+                // 从res.data中提取数据，并确保其为数组
+                orders = Array.isArray(res.data) ? res.data : [];
             } else {
-                throw new Error(res?.message || '获取工单列表失败');
+                // 如果后端返回非200状态码或无message，抛出通用错误
+                throw new Error(res?.msg || '获取工单列表失败');
             }
+
+            // 格式化时间和状态映射
+            const formattedOrders = orders.map(order => {
+                // 强制映射英文状态
+                let statusEn = this.data.statusEnMap[order.status] || 'unclaimed';
+                let statusCn = this.data.statusMap[statusEn] || order.status;
+                return {
+                    ...order,
+                    createdAt: formatDate(order.createdAt),
+                    updatedAt: order.updatedAt ? formatDate(order.updatedAt) : '',
+                    statusEn,
+                    statusCn
+                };
+            });
+            // 排序逻辑用英文
+            formattedOrders.sort((a, b) => {
+                // 未领取排最前
+                if (a.statusEn === 'unclaimed' && b.statusEn !== 'unclaimed') return -1;
+                if (a.statusEn !== 'unclaimed' && b.statusEn === 'unclaimed') return 1;
+                // 处理完排最后
+                if (a.statusEn === 'completed' && b.statusEn !== 'completed') return 1;
+                if (a.statusEn !== 'completed' && b.statusEn === 'completed') return -1;
+                // 处理中/已上报按 updatedAt 降序
+                if (a.statusEn === b.statusEn) {
+                    // 兼容iOS日期格式，将横线替换为斜线
+                    const aDateString = (a.updatedAt || a.createdAt).replace(/-/g, '/');
+                    const bDateString = (b.updatedAt || b.createdAt).replace(/-/g, '/');
+                    const aTime = new Date(aDateString).getTime();
+                    const bTime = new Date(bDateString).getTime();
+                    return bTime - aTime;
+                }
+                return 0;
+            });
+            console.log('处理后的工单数据:', formattedOrders);
+            this.setData({ orders: formattedOrders });
         } catch (error) {
             this.setData({ 
                 error: error.message || '获取工单列表失败，请稍后重试'
@@ -168,7 +174,7 @@ Page({
                 data: { workId: id }
             });
             
-            if (res && res.code === 200) {
+            if (res) {
                 wx.showToast({ 
                     title: '认领成功', 
                     icon: 'success' 
@@ -176,7 +182,7 @@ Page({
                 // 刷新列表
                 this.loadOrders();
             } else {
-                throw new Error(res?.message || '认领失败');
+                throw new Error('认领失败');
             }
         } catch (error) {
             wx.showToast({ 

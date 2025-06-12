@@ -1,9 +1,8 @@
 import authService from '../services/auth';
-
-// 基础URL
-//const BASE_URL = 'http://localhost:8080';
 import config from '../config/api';
-const BASE_URL = config.baseURL;
+
+// 基础URL (对于wx.cloud.callContainer不再需要，但如果还有wx.request调用可以保留)
+// const BASE_URL = config.baseURL;
 
 /**
  * 请求工具类
@@ -16,12 +15,14 @@ const request = {
    */
   async request(options) {
     // 合并配置
-    const config = {
-      url: options.url.startsWith('http') ? options.url : `${BASE_URL}${options.url}`,
+    const requestConfig = {
+      // 对于 wx.cloud.callContainer，这里是后端服务的相对路径，不是完整URL
+      path: options.url,
       method: options.method || 'GET',
       data: options.data,
       header: {
         'content-type': 'application/json',
+        'X-WX-SERVICE': config.cloudServiceName,
         ...options.header
       }
     };
@@ -29,16 +30,40 @@ const request = {
     // 添加token
     const token = authService.getToken();
     if (token) {
-      config.header.Authorization = `Bearer ${token}`;
+      requestConfig.header.Authorization = `Bearer ${token}`;
     }
 
-    // 用 Promise 包装 wx.request
+    // 用 Promise 包装 wx.cloud.callContainer
     return new Promise((resolve, reject) => {
-      wx.request({
-        ...config,
+      if (!config.cloudEnvId) {
+        console.error('Cloud Environment ID is not configured.');
+        return reject(new Error('云环境ID未配置'));
+      }
+      
+      wx.cloud.callContainer({
+        config: {
+          env: config.cloudEnvId // 使用配置的云环境ID
+        },
+        ...requestConfig,
         success: (res) => {
+          // wx.cloud.callContainer 的响应格式是 res.data 中包含业务数据
           if (res.statusCode === 200) {
-            resolve(res.data);
+            // 业务数据通常在 res.data.data 中，或直接在 res.data 中
+            // 假设后端返回的数据结构是 { code: 200, data: ..., msg: ... }
+            if (res.data && res.data.code === 200) {
+              // 成功时，总是返回整个 Result 对象，而不是尝试解构其内部的data字段
+              resolve(res.data);
+            } else if (res.data && res.data.code === 401) {
+              authService.clearAuth();
+              wx.redirectTo({
+                url: '/pages/login/login'
+              });
+              reject(new Error(res.data.msg || '登录已过期，请重新登录'));
+            } else {
+              const error = new Error(res.data?.msg || '请求失败');
+              error.response = res;
+              reject(error);
+            }
           } else if (res.statusCode === 401) {
             authService.clearAuth();
             wx.redirectTo({
@@ -46,7 +71,7 @@ const request = {
             });
             reject(new Error('登录已过期，请重新登录'));
           } else {
-            const error = new Error(res.data?.message || '请求失败');
+            const error = new Error(res.errMsg || '请求失败');
             error.response = res;
             reject(error);
           }

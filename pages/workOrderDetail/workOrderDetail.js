@@ -220,47 +220,29 @@ Page({
   // 批量上传本地图片到服务器，返回图片URL数组（带日志）
   async uploadImagesToServer(localImagePaths) {
     const uploadedUrls = [];
+    const app = getApp(); // 获取 app 实例以访问云配置
     for (let filePath of localImagePaths) {
       console.log('准备上传图片到服务器:', filePath);
-      await new Promise((resolve, reject) => {
-        wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`,
-          filePath,
-          name: 'file',
-          formData: {
-            type: 'feedback'
-          },
-          header: {
-            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
-          },
-          success: (res) => {
-            try {
-              const data = JSON.parse(res.data);
-              console.log('图片上传响应:', data);
-              if (data.url) {
-                // 确保返回完整的URL
-                const fullUrl = data.url.startsWith('http') ? data.url : `${app.globalData.baseUrl}${data.url}`;
-                uploadedUrls.push(fullUrl);
-                resolve();
-              } else {
-                wx.showToast({ title: '图片上传失败', icon: 'none' });
-                reject();
-              }
-            } catch (e) {
-              console.error('解析响应失败:', e);
-              wx.showToast({ title: '图片上传失败', icon: 'none' });
-              reject();
-            }
-          },
-          fail: (err) => {
-            console.error('图片上传失败:', err);
-            wx.showToast({ title: '图片上传失败', icon: 'none' });
-            reject(err);
+      try {
+        const cloudPath = `workorder_handled/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`; // 生成唯一的云路径
+        const uploadRes = await wx.cloud.uploadFile({
+          cloudPath: cloudPath,
+          filePath: filePath,
+          config: {
+            env: app.globalData.cloudEnvId // 使用配置的云环境ID
           }
         });
-      });
+        console.log('图片上传云存储响应:', uploadRes);
+        if (uploadRes.fileID) {
+          uploadedUrls.push(uploadRes.fileID); // 存储 fileID (云文件路径)
+              } else {
+                wx.showToast({ title: '图片上传失败', icon: 'none' });
+              }
+            } catch (e) {
+        console.error('上传图片到云存储失败:', e);
+            wx.showToast({ title: '图片上传失败', icon: 'none' });
+          }
     }
-    console.log('所有图片上传完成，服务器URL:', uploadedUrls);
     return uploadedUrls;
   },
 
@@ -283,15 +265,20 @@ Page({
         handledImages: this.data.handledImages
       });
       console.log('提交反馈接口响应:', res);
-      if (res.statusCode === 200 && res.data && res.data.code === 200) {
+      console.log('Before if condition: res.code =', res.code, ', typeof res.code =', typeof res.code);
+      if (res.code === 200) {
+        console.log('Inside if condition: Backend reported success.');
         wx.showToast({
           title: '提交成功',
           icon: 'success'
         });
         this.hideFeedbackModal();
         this.setData({ handledImages: [] }); // 清空图片
+        console.log('Calling loadWorkOrderDetail after success...');
         this.loadWorkOrderDetail();
+        console.log('loadWorkOrderDetail called.');
       } else {
+        console.log('Inside else condition: Backend reported failure or unexpected format.');
         throw new Error(res.data?.msg || '提交失败');
       }
     } catch (err) {
@@ -316,18 +303,17 @@ Page({
 
       if (res.confirm) {
         wx.showLoading({ title: '上报中...' });
-        wx.request({
-          url: `${app.globalData.baseUrl}/api/gridworker/report-to-captain`,
+        const app = getApp();
+        try {
+          const reportRes = await app.call({
+            path: '/api/gridworker/report-to-captain',
           method: 'POST',
-          header: {
-            'content-type': 'application/json',
-            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
-          },
           data: {
             workId: this.data.workOrder.workId
-          },
-          success: (reportRes) => {
-            if (reportRes.statusCode === 200 && reportRes.data && reportRes.data.code === 200) {
+            }
+          });
+          // app.call 成功返回的是业务数据，无需再判断 statusCode 和 code
+          if (reportRes) {
               wx.showToast({
                 title: '上报成功',
                 icon: 'success'
@@ -335,21 +321,18 @@ Page({
               this.loadWorkOrderDetail();
             } else {
               wx.showToast({
-                title: reportRes.data?.msg || '上报失败',
-                icon: 'none'
-              });
-            }
-          },
-          fail: (err) => {
-            wx.showToast({
-              title: err.errMsg || '上报失败，请重试',
+              title: '上报失败',
               icon: 'none'
             });
-          },
-          complete: () => {
-            wx.hideLoading();
           }
+        } catch (error) {
+          wx.showToast({
+            title: error.message || '上报失败，请重试',
+            icon: 'none'
         });
+        } finally {
+          wx.hideLoading();
+        }
       }
     } catch (err) {
       wx.showToast({
@@ -385,33 +368,29 @@ Page({
 
   async loadGridWorkers() {
     try {
-      const res = await new Promise((resolve, reject) => {
-        wx.request({
-          url: `${app.globalData.baseUrl}/api/captain/grid-workers`,
+      const app = getApp();
+      const res = await app.call({
+        path: '/api/captain/grid-workers',
           method: 'GET',
-          header: {
-            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
-          },
-          success: (res) => resolve(res),
-          fail: (err) => reject(err)
-        });
       });
       
       console.log('获取网格员响应:', res);
       
-      if (res.statusCode === 200 && res.data && res.data.code === 200) {
-        const gridWorkers = res.data.data || [];
-        if (Array.isArray(gridWorkers)) {
+      // 确保后端返回成功，并从 res.data 中提取网格员数据
+      if (res && res.code === 200) {
+        console.log('--- 调试 loadGridWorkers ---');
+        console.log('res.data 的类型:', typeof res.data);
+        console.log('res.data 是否是数组:', Array.isArray(res.data));
+        console.log('res.data 的内容:', res.data);
+        const gridWorkers = Array.isArray(res.data) ? res.data : [];
           this.setData({ 
             gridWorkers,
             error: null
           });
           console.log('设置网格员数据:', gridWorkers);
         } else {
-          throw new Error('网格员数据格式错误');
-        }
-      } else {
-        throw new Error(res.data?.message || '获取网格员失败');
+        // 如果后端返回 code 不是 200，或者 res 对象格式不正确
+        throw new Error(res?.message || '获取网格员失败: 后端返回异常或数据格式错误');
       }
     } catch (e) {
       console.error('获取网格员失败:', e);
@@ -448,33 +427,27 @@ Page({
     }
     wx.showLoading({ title: '分配中...' });
     try {
-      const res = await new Promise((resolve, reject) => {
-        wx.request({
-          url: `${app.globalData.baseUrl}/api/captain/reassign`,
+      const app = getApp();
+      const res = await app.call({
+        path: '/api/captain/reassign',
           method: 'POST',
-          header: {
-            'content-type': 'application/json',
-            'Authorization': 'Bearer ' + wx.getStorageSync('auth_token')
-          },
           data: {
             workId: this.data.workOrder.workId,
             gridWorkerOpenid: this.data.selectedWorker.openid,
             deadline: this.data.assignDeadline
-          },
-          success: resolve,
-          fail: reject
-        });
+        }
       });
       console.log('分配工单接口响应:', res);
-      if (res.statusCode === 200 && res.data && res.data.code === 200) {
+      // app.call 成功返回的是业务数据，无需再判断 statusCode 和 code
+      if (res) {
         wx.showToast({ title: '分配成功', icon: 'success' });
         this.closeAssignModal();
         this.loadWorkOrderDetail();
       } else {
-        wx.showToast({ title: res.data?.message || '分配失败', icon: 'none' });
+        wx.showToast({ title: '分配失败', icon: 'none' });
       }
     } catch (e) {
-      wx.showToast({ title: '分配失败', icon: 'none' });
+      wx.showToast({ title: e.message || '分配失败', icon: 'none' });
     } finally {
       wx.hideLoading();
     }
@@ -482,23 +455,22 @@ Page({
 
   // 根据 actionType 生成处理记录的展示文本
   getDisplayDescription(log) {
+    const operatorText = log.operatorRole + log.operatorUsername || log.operatorRole;
     switch (log.actionType) {
       case '提交工单':
-        return log.operatorRole + '提交工单';
+        return  '用户提交工单';
       case '认领工单':
-        // TODO: 如果operatorOpenid对应的是网格员，可以显示网格员名称
-        return log.operatorRole + '认领了工单';
+        return operatorText + '认领了工单';
       case '开始处理':
-         return log.operatorRole + '开始处理工单';
+         return operatorText + '正在处理工单';
       case '反馈处理':
-        return log.operatorRole + '反馈了处理结果';
+        return operatorText + '反馈工单';
       case '主动上报':
-        return log.operatorRole + '将工单上报给片区长';
+        return operatorText + '将工单上报给片区长';
       case '系统超时上报':
         return '系统超时自动上报';
       case '片区长分配':
-         // TODO: 如果operatorOpenid对应的是片区长，可以显示片区长名称，并显示分配给哪个网格员
-        return log.operatorRole + '重新分配了工单';
+         return log.actionDescription || (operatorText + '重新分配工单');
       default:
         return log.actionDescription || '未知操作';
     }

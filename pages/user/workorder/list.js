@@ -82,75 +82,50 @@ Page({
       console.log('请求参数:', {
         token: token ? '存在' : '不存在',
         status: status,
-        baseUrl: app.globalData.baseUrl
+        // baseUrl: app.globalData.baseUrl // 不再需要，将通过内网调用
       });
       
-      const url = `${app.globalData.baseUrl}/api/workorder/user`;
-      console.log('发送请求到:', url);
+      // const url = `${app.globalData.baseUrl}/api/workorder/user`; // 不再需要
+      // console.log('发送请求到:', url);
       
-      // 使用Promise包装wx.request
-      const requestPromise = new Promise((resolve, reject) => {
-        const requestData = {
-          status: status
-        };
-
-        wx.request({
-          url: url,
-          method: 'GET',
-          header: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          data: requestData,
-          success: (res) => {
-            console.log('请求成功，响应数据:', res);
-            resolve(res);
-          },
-          fail: (err) => {
-            console.error('请求失败:', err);
-            reject(new Error(err.errMsg || '网络请求失败'));
-          },
-          complete: () => {
-            console.log('请求完成');
-          }
-        });
+      // 使用 getApp().call() 替代 wx.request
+      const app = getApp();
+      const res = await app.call({
+        path: '/api/workorder/user', // 相对路径
+        method: 'GET',
+        header: {
+          'Authorization': `Bearer ${token}`,
+        },
+        data: { status: status } // 传递状态参数
       });
 
-      const res = await requestPromise;
       console.log('请求响应:', res);
 
       if (!res) {
         throw new Error('网络请求失败，请检查网络连接');
       }
 
-      if (res.statusCode === 200 && res.data) {
-        // 转换后端数据格式为前端所需格式
-        const workOrdersData = res.data.data || [];  // 从响应中获取 data 数组
-        const workOrders = workOrdersData.map(order => {
-          // 格式化时间（保持原有格式，不做转换）
-          const createTime = order.createdAt ? order.createdAt.substring(0, 16).replace('T', ' ') : '未知时间';
+      // 从 res.data 中获取 workOrders 数组
+      const workOrdersData = res.data || []; // 修改为从 res.data 中获取
 
-          return {
-            id: order.workId,
-            description: order.description || '无描述',
-            status: this.data.statusMap[order.status]?.text || order.status,
-            createTime: createTime,
-            buildingInfo: order.buildingInfo || '未填写楼栋信息'
-          };
-        });
+      const workOrders = workOrdersData.map(order => {
+        // 格式化时间（保持原有格式，不做转换）
+        const createTime = order.createdAt ? order.createdAt.substring(0, 16).replace('T', ' ') : '未知时间';
 
-        this.setData({
-          workOrders: workOrders,
-          isLoading: false
-        });
-        console.log('处理后的工单数据:', workOrders);
-      } else {
-        console.error('请求失败:', {
-          statusCode: res.statusCode,
-          data: res.data
-        });
-        throw new Error(res.data?.message || '加载失败');
-      }
+        return {
+          id: order.workId,
+          description: order.description || '无描述',
+          status: this.data.statusMap[order.status]?.text || order.status,
+          createTime: createTime,
+          buildingInfo: order.buildingInfo || '未填写楼栋信息'
+        };
+      });
+
+      this.setData({
+        workOrders: workOrders,
+        isLoading: false
+      });
+      console.log('处理后的工单数据:', workOrders);
     } catch (error) {
       console.error('加载工单失败:', error);
       console.error('错误详情:', {

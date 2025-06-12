@@ -22,6 +22,17 @@ App({
 
   onLaunch() {
     console.log('=== 应用启动 ===');
+    // 初始化云开发环境 (全局执行一次)
+    if (config.cloudEnvId) {
+      wx.cloud.init({
+        env: config.cloudEnvId,
+        traceUser: true, // 开启用户追踪
+      });
+      console.log('wx.cloud.init initialized with env:', config.cloudEnvId);
+    } else {
+      console.warn('config.cloudEnvId is not set. wx.cloud.init not performed.');
+    }
+
     // 从本地存储恢复用户状态
     const token = wx.getStorageSync('auth_token');
     const userInfo = wx.getStorageSync('userInfo');
@@ -34,6 +45,8 @@ App({
       this.globalData.isGrid = userRole === '网格员';
       this.globalData.isArea = userRole === '片区长';
     }
+
+    
   },
 
   onShow() {
@@ -58,5 +71,78 @@ App({
       return false;
     }
     return true;
+  },
+
+  /**
+   * 封装的微信云托管调用方法
+   * @param {*} obj 业务请求信息，可按照需要扩展
+   *   obj.path: 后端服务接口地址
+   *   obj.method: HTTP 请求方法 (可选，默认为GET)
+   *   obj.data: 请求的参数 (可选)
+   *   obj.header: 其他header参数 (可选)
+   * @param {*} number 请求等待，默认不用传，用于初始化等待
+   */
+  async call(obj, number = 0) {
+    const that = this;
+    if (that.cloud == null) {
+      const cloud = new wx.cloud.Cloud({
+        resourceAppid: config.appId, // 您的AppID
+        resourceEnv: config.cloudEnvId, // 微信云托管的环境ID
+      });
+      that.cloud = cloud;
+      await that.cloud.init(); // init过程是异步的，需要等待init完成才可以发起调用
+    }
+
+    try {
+      const result = await that.cloud.callContainer({
+        config: {
+          env: config.cloudEnvId, // 微信云托管的环境ID
+        },
+        path: obj.path, // 填入业务自定义路径和参数
+        method: obj.method || 'GET', // 按照自己的业务开发，选择对应的方法
+        header: {
+          'X-WX-SERVICE': config.cloudServiceName, // 填入服务名称
+          'content-type': 'application/json', // 默认 content-type
+          ...(wx.getStorageSync('auth_token') ? { 'Authorization': `Bearer ${wx.getStorageSync('auth_token')}` } : {}), // 自动添加Authorization头
+          ...obj.header // 合并其他header参数
+        },
+        data: obj.data, // 请求参数
+        // 其余参数同 wx.request (如 dataType, timeout 等)
+      });
+      console.log(`微信云托管调用结果${result.errMsg} | callid:${result.callID}`);
+      console.log('完整的 wx.cloud.callContainer 响应对象:', result); // 打印完整响应对象
+      
+      // 根据后端的返回格式判断
+      if (result.statusCode === 200) {
+        // 后端直接返回业务数据（如登录接口），或者返回 { code: 200, data: ..., msg: ... }
+        // 为了兼容两种情况，这里只判断 statusCode 为 200，并直接返回 result.data
+        // 后续的API调用方（如userApi.userLogin）会根据具体返回的数据结构进行解析
+        return result.data;
+      } else if (result.statusCode === 401 || (result.data && result.data.code === 401)) {
+        // 处理登录过期
+        wx.removeStorageSync('auth_token');
+        wx.removeStorageSync('userInfo');
+        wx.removeStorageSync('userRole');
+        wx.redirectTo({
+          url: '/pages/login/login'
+        });
+        throw new Error(result.data?.msg || '登录已过期，请重新登录');
+      } else {
+        // 如果后端返回了错误信息，优先使用后端提供的 msg，否则使用 result.errMsg 或默认错误
+        throw new Error(result.data?.msg || result.errMsg || '请求失败');
+      }
+    } catch (e) {
+      const error = e.toString();
+      // 如果错误信息为未初始化，则等待300ms再次尝试，因为init过程是异步的
+      if (error.indexOf("Cloud API isn't enabled") != -1 && number < 3) {
+        return new Promise((resolve) => {
+          setTimeout(function() {
+            resolve(that.call(obj, number + 1));
+          }, 300);
+        });
+      } else {
+        throw new Error(`微信云托管调用失败: ${error}`);
+      }
+    }
   }
 })
