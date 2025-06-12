@@ -11,7 +11,7 @@ Page({
     partyActivities: [
       {
         id: 1,
-        //cover: '/assets/images/123jizhi.jpg',
+
         cover:'https://img.picgo.net/2025/06/03/123jizhi7a52140969699dd4.jpg',
         title: '1+2+3工作机制',
       },
@@ -29,7 +29,7 @@ Page({
         title:"安全走访",
         images:[
           { 
-            src:"https://img.picui.cn/free/2025/05/27/68356a6e63016.jpg",
+            src:"https://img.picgo.net/2025/06/12/74526ccfa8788cc1b986dcb1f70f59f553fb620ad024b449.jpg",
             caption:"网格员和物业管家一起检查弱电箱杂物"
           },
           {
@@ -46,7 +46,7 @@ Page({
             caption:"拆除112栋一楼违建"
           },
           {
-            src:"https://img.picui.cn/free/2025/05/27/68356c87c013c.jpg",
+            src:"https://img.picgo.net/2025/06/12/143ff447d51dc3bc82a.jpg",
             caption:"拆除143楼顶违建"
           }
         ],
@@ -59,7 +59,7 @@ Page({
             caption:"网格员和物业管家走访独居老人"
           },
           {
-            src:"https://img.picui.cn/free/2025/05/27/68356dcfa741e.jpg",
+            src:"https://img.picgo.net/2025/06/12/a80c9ceac63b23360a64f793e902dc487eb2b297c32b297c.jpg",
             caption:"网格员和物业管家走访独居老人"
           }
         ],
@@ -72,7 +72,7 @@ Page({
             caption:"网格员和物业管家共同清理楼道杂物"
           },
           {
-            src:"https://img.picui.cn/free/2025/05/27/68356e5b5b2a2.jpg",
+            src:"https://img.picgo.net/2025/06/12/34a6a9d08ae1cc7596649dbacac972b3e52ece88f3bc8c04.jpg",
             caption:"网格员和物业管家共同巡查小区"
           }
         ],
@@ -85,7 +85,7 @@ Page({
             caption:"2024年10月10日一期房屋渗水维修施工单位选聘"
           },
           {
-            src:"https://img.picui.cn/free/2025/05/27/68356edc5f90e.jpg",
+            src:"https://img.picgo.net/2025/06/12/202541431a9d074ccbe4415.jpg",
             caption:"2025年4月14日一期管委会消防电系统会议"
           }
         ]
@@ -97,12 +97,12 @@ Page({
       {
         id: 1,
         before: 'https://img.picgo.net/2025/06/12/9e567cf09dac76baa99c0bd4810405de621e309d9ad262a5.jpg',
-        after: 'https://img.picui.cn/free/2025/05/27/683571ba345e4.jpg',
+        after: 'https://img.picgo.net/2025/06/12/36f11c1538bc749638286f3fca9349f703d7b4eccc5807e2.jpg',
         title: '105栋西边围墙整改',
       },
       {
         id: 2,
-        before: 'https://img.picui.cn/free/2025/05/27/683572787ef95.jpg',
+        before: 'https://img.picgo.net/2025/06/12/2b9bf7fd27315ec054624d7b8cf164d2be9c5cd13ce3fdef.jpg',
         after: 'https://img.picgo.net/2025/06/12/1eca936205391186b2224851159acd07521fc943bfff0bbf.jpg',
         title: '110栋西边围墙',
       },  
@@ -115,18 +115,18 @@ Page({
       {
         id:4,
         before:'https://img.picgo.net/2025/06/12/215feaac734a55f208575b747a6fb4a86bfd97e34f85c89a.png',
-        after:'https://img.picui.cn/free/2025/05/27/6835735754b69.png',
+        after:'https://img.picgo.net/2025/06/12/1f935a990787f60900ec1e53e9d6fbc7e515a013208b047e.png',
         title:'128栋宅间道绿化和花坛改造',
       },
       {
         id:5,
-        before:'https://img.picui.cn/free/2025/05/27/683573fe18f81.png',
+        before:'https://img.picgo.net/2025/06/12/dd726c7fcc7d2ceed9c8ff268af5ff01cb899c6a47989887.png',
         after:'https://img.picgo.net/2025/06/12/f41f380961cc44647bf7e7707b7b70acc7e3a11506000082.jpg',
         title:'135栋前停车位改造'
       },
       {
         id:6,
-        before:'https://img.picui.cn/free/2025/05/27/68357496da0b0.png',
+        before:'https://img.picgo.net/2025/06/12/a2648876bddb49857949bd2978f95b1a9d422acb68a37482.png',
         after:'https://img.picgo.net/2025/06/12/c35fffd33b38da8b85eb09866a056e00c64b3358f87d617f.png',
         title:'138栋前休闲区改造'
       },
@@ -138,8 +138,8 @@ Page({
       },
       {
         id:8,
-        before:'https://img.picui.cn/free/2025/05/27/683575cb58056.png',
-        after:'https://img.picui.cn/free/2025/05/27/683575cdbdfae.jpg',
+        before:'https://img.picgo.net/2025/06/12/a5ba5f26f29bdcf9cb707a078112bc4ac30d13416c015e98.png',
+        after:'https://img.picgo.net/2025/06/12/5c5d4d6da3b189edf5944500d4d2a0a40ce7d000112b1ab8.jpg',
         title:'网球场旁河道改造'
       }
     ],
@@ -147,10 +147,11 @@ Page({
     activities: [
       {
         id: 1,
-        cover: 'https://img.picui.cn/free/2025/05/27/68357976848f3.jpg',
+        cover: 'https://img.picgo.net/2025/06/12/b01fc0c80957386a713d11f8a0676a813a23ece1835092e2.jpg',
         images:[
-          {src:'https://img.picui.cn/free/2025/05/28/68367737313a0.jpg'},
-          {src:'https://img.picui.cn/free/2025/05/28/68367be97e544.jpg'},
+          {src:'https://img.picgo.net/2025/06/12/5ee236670dea066f2b0bdf9ba2d2c38a0c660b383c61c843.jpg'},
+          {src:'https://img.picgo.net/2025/06/12/292802b157434ac26e1856eb334161930ffb0f6e29e9dcff.jpg'},
+          {src: 'https://img.picgo.net/2025/06/12/1c29b3b9e37a8797a.jpg'},
         ],
         title: '雷锋日活动',
         date:'2025-01-01',
@@ -159,9 +160,9 @@ Page({
       },
       {
         id: 2,
-        cover: 'https://img.picui.cn/free/2025/05/27/6835794bf2994.jpg',
+        cover: 'https://img.picgo.net/2025/06/12/1738a9fb86b25f02b.jpg',
         images:[
-          {src:'https://img.picui.cn/free/2025/05/27/6835794ab43d0.jpg'}
+          {src:'https://img.picgo.net/2025/06/12/56a21668b2bafe4e3517826d95a04bbceee96c43380df8cb.jpg'}
         ],
         title: '迎春文艺汇演活动',
         date:'2025-01-02',
@@ -179,9 +180,9 @@ Page({
       },
       {
         id: 4,
-        cover: 'https://img.picui.cn/free/2025/05/27/68357a33377cd.jpg',
+        cover: 'https://img.picgo.net/2025/06/12/dc95bbc09635717a32ac6e9eeea00b94aaf85432a33f305b.jpg',
         images:[
-          {src:'https://img.picui.cn/free/2025/05/28/68367c4d6c33f.jpg'},
+          {src:'https://img.picgo.net/2025/06/12/5b318b48f3d20ec99acf1a9717b3aa092ad38edbfb122e9c.jpg'},
         ],
         title: '写春联活动',
         date:'2025-01-03',
