@@ -304,8 +304,8 @@ Page({
         console.log('是否在边界附近:', isNearBoundary);
         console.log('最终判断结果:', inside || isNearBoundary);
         
-        return true; //测试始终在
-        //return inside || isNearBoundary;
+        //return true; //测试始终在
+        return inside || isNearBoundary;
     },
 
     // 修改获取位置信息方法
@@ -552,7 +552,7 @@ Page({
         }
 
         // 测试，始终允许
-        this.data.locationAuth = true;
+        //this.data.locationAuth = true;
 
         if (!this.data.locationAuth) {
             wx.showModal({
