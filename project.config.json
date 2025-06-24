@@ -43,5 +43,36 @@
     "tabIndent": "insertSpaces",
     "tabSize": 4
   },
-  "simulatorPluginLibVersion": {}
+  "simulatorPluginLibVersion": {},
+    "appid": "wxf64337e0a929c126",
+    "compileType": "miniprogram",
+    "libVersion": "3.8.2",
+    "packOptions": {
+        "ignore": [
+            {
+                "value": "assets/images",
+                "type": "folder"
+            }
+        ],
+        "include": []
+    },
+    "setting": {
+        "coverView": true,
+        "es6": true,
+        "postcss": true,
+        "minified": true,
+        "enhance": true,
+        "showShadowRootInWxmlPanel": true,
+        "babelSetting": {
+            "ignore": [],
+            "disablePlugins": [],
+            "outputPath": ""
+        },
+        "ignoreUploadUnusedFiles": false
+    },
+    "condition": {},
+    "editorSetting": {
+        "tabIndent": "insertSpaces",
+        "tabSize": 4
+    }
 }
