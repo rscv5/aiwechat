@@ -1,0 +1,6 @@
+<view class="empty-state">
+  <image src="/assets/icons/empty.png" class="empty-img"/>
+  <text class="empty-title">{{title}}</text>
+  <text class="empty-subtitle">{{subtitle}}</text>
+  <button class="empty-btn" wx:if="{{showBtn}}" bindtap="onAction">{{btnText}}</button>
+</view> 

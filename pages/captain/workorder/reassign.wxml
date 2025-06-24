@@ -1,0 +1,41 @@
+<view class="container">
+    <!-- 加载中提示 -->
+    <view class="loading" wx:if="{{isLoading}}">
+        <view class="loading-icon"></view>
+        <text>加载中...</text>
+    </view>
+
+    <!-- 错误提示 -->
+    <view class="error" wx:if="{{error}}">
+        <text>{{error}}</text>
+        <button bindtap="loadGridWorkers">重试</button>
+    </view>
+
+    <!-- 重新分配表单 -->
+    <view class="form" wx:if="{{!isLoading && !error}}">
+        <!-- 选择网格员 -->
+        <view class="form-item">
+            <view class="form-label">选择网格员</view>
+            <picker bindchange="onWorkerChange" value="{{selectedWorker}}" range="{{gridWorkers}}" range-key="username">
+                <view class="picker {{selectedWorker ? '' : 'placeholder'}}">
+                    {{selectedWorker ? gridWorkers[selectedWorker].username : '请选择网格员'}}
+                </view>
+            </picker>
+        </view>
+
+        <!-- 设置截止时间 -->
+        <view class="form-item">
+            <view class="form-label">截止时间</view>
+            <picker mode="date" value="{{deadline}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onDeadlineChange">
+                <view class="picker {{deadline ? '' : 'placeholder'}}">
+                    {{deadline || '请选择截止时间（可选，默认24小时后）'}}
+                </view>
+            </picker>
+        </view>
+
+        <!-- 提交按钮 -->
+        <button class="submit-btn" bindtap="handleSubmit" loading="{{isLoading}}">
+            确认分配
+        </button>
+    </view>
+</view> 

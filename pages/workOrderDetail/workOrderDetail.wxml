@@ -1,0 +1,225 @@
+<view class="detail-container">
+  <!-- 顶部状态栏 -->
+  <view class="status-bar {{workOrder.status === '处理完' ? 'status-completed' : workOrder.status === '已上报' ? 'status-reported' : 'status-processing'}}">
+    <view class="status-content">
+      <text class="status-text">{{workOrder.status || '未知状态'}}</text>
+      <text class="order-id">工单号：{{workOrder.workId}}</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error" wx:if="{{error}}">
+    <image class="error-icon" src="../../assets/icons/empty.png" />
+    <text>{{error}}</text>
+    <button class="retry-btn" bindtap="loadGridWorkers">重试</button>
+  </view>
+
+  <block wx:if="{{workOrder}}">
+    <!-- 工单基本信息 -->
+    <view class="info-card">
+      <view class="info-section">
+        <view class="info-item">
+          <image class="info-icon" src="../../assets/icons/building.png" mode="aspectFit" />
+          <text class="info-label">楼栋</text>
+          <text class="info-value">{{workOrder.buildingInfo}}</text>
+        </view>
+        <view class="info-item">
+          <image class="info-icon" src="../../assets/icons/location.png" mode="aspectFit" />
+          <text class="info-label">地址</text>
+          <text class="info-value">{{workOrder.address || '未提供'}}</text>
+        </view>
+        <view class="info-item">
+          <image class="info-icon" src="../../assets/icons/phone.png" mode="aspectFit" />
+          <text class="info-label">联系电话</text>
+          <text class="info-value">{{workOrder.submitterPhone || '未提供'}}</text>
+        </view>
+      </view>
+      
+      <view class="description-section">
+        <text class="section-title">问题描述</text>
+        <text class="description-text">{{workOrder.description}}</text>
+      </view>
+    </view>
+
+    <!-- 问题图片区域 -->
+    <view class="image-section">
+      <text class="section-title">问题图片</text>
+      <scroll-view class="image-scroll" scroll-x enable-flex wx:if="{{workOrder.imageUrls && workOrder.imageUrls.length > 0}}">
+        <block wx:for="{{workOrder.imageUrls}}" wx:key="index">
+          <view class="image-wrapper">
+            <image
+              class="problem-image"
+              src="{{item}}"
+              mode="aspectFill"
+              bindtap="previewImage"
+              data-type="workOrder"
+              data-index="{{index}}"
+            />
+          </view>
+        </block>
+      </scroll-view>
+      <view wx:else class="no-image">
+        <image src="../../assets/icons/no-image.png" mode="aspectFit" />
+        <text>暂无图片</text>
+      </view>
+    </view>
+
+    <!-- 处理记录时间线 -->
+    <view class="timeline-section" wx:if="{{workOrder.processingLogs && workOrder.processingLogs.length}}">
+      <text class="section-title">处理记录</text>
+      <view class="timeline">
+        <block wx:for="{{workOrder.processingLogs}}" wx:key="logId">
+          <view class="timeline-item {{index === workOrder.processingLogs.length - 1 ? 'latest' : ''}}">
+            <view class="timeline-dot"></view>
+            <view class="timeline-content">
+              <text class="timeline-action">{{item.displayDescription}}</text>
+              <text class="timeline-time">{{item.createdAt || item.updatedAt || '未知时间'}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 处理结果卡片 -->
+    <view class="result-card" wx:if="{{workOrder.status === '处理完'}}">
+      <view class="card-header">
+        <text class="section-title">处理结果</text>
+        <button class="view-result-btn" bindtap="showResultModal">查看详情</button>
+      </view>
+    </view>
+
+    <!-- 处理结果弹窗 -->
+    <view class="result-modal {{showResultModal ? 'show' : ''}}" wx:if="{{workOrder.status === '处理完'}}">
+      <view class="modal-content">
+        <view class="modal-header">
+          <text class="modal-title">处理结果详情</text>
+          <image class="close-icon" src="../../assets/icons/close.png" bindtap="hideResultModal" />
+        </view>
+        <view class="modal-body">
+          <view class="result-section">
+            <text class="section-title">处理说明</text>
+            <text class="result-text">{{(workOrder.feedbackList && workOrder.feedbackList.length >
+                                       0 && workOrder.feedbackList[0].feedbackDescription) || '暂无处理说明'}}</text>
+          </view>
+          <view class="result-images" wx:if="{{workOrder.feedbackList[0].feedbackImages && workOrder.feedbackList[0].feedbackImages.length > 0}}">
+            <text class="section-title">处理图片</text>
+            <view class="image-grid">
+              <block wx:for="{{workOrder.feedbackList[0].feedbackImages}}" wx:key="index">
+                <image
+                  class="result-image"
+                  src="{{item}}"
+                  mode="aspectFill"
+                  bindtap="previewImage"
+                  data-type="feedback"
+                  data-index="{{index}}"
+                />
+              </block>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 底部操作栏 -->
+  <view class="footer-bar">
+    <block wx:if="{{userRole === '网格员' && (workOrder.status === '处理中' || workOrder.status === 'processing')}}">
+      <button class="action-btn feedback-btn" bindtap="showFeedbackModal">
+        <text>工单反馈</text>
+      </button>
+      <button class="action-btn report-btn" bindtap="reportToCaptain">
+        <text>上报工单</text>
+      </button>
+    </block>
+    <!-- 片区长分配工单按钮 -->
+    <button wx:if="{{canAssign}}" class="action-btn assign-btn" bindtap="openAssignModal">分配工单</button>
+    <button class="back-btn" bindtap="goBack">返回</button>
+  </view>
+
+  <!-- 反馈弹窗 -->
+  <view class="feedback-modal {{showFeedbackModal ? 'show' : ''}}" wx:if="{{showFeedbackModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">工单反馈</text>
+        <image class="close-icon" src="../../assets/icons/close.png" bindtap="hideFeedbackModal" />
+      </view>
+      <view class="modal-body">
+        <textarea
+          class="feedback-input"
+          placeholder="请输入处理说明..."
+          bindinput="onHandledDescInput"
+          value="{{handledDesc}}"
+          maxlength="500"
+        />
+        <view class="char-count">{{handledDesc.length || 0}}/500</view>
+        <view class="image-upload">
+          <view class="upload-preview" wx:if="{{handledImages.length > 0}}">
+            <block wx:for="{{handledImages}}" wx:key="index">
+              <view class="preview-item">
+                <image
+                  class="preview-image"
+                  src="{{item}}"
+                  mode="aspectFill"
+                  bindtap="previewImage"
+                  data-type="handled"
+                  data-index="{{index}}"
+                />
+                <view class="delete-btn" bindtap="deleteImage" data-index="{{index}}">×</view>
+              </view>
+            </block>
+          </view>
+          <button class="upload-btn" bindtap="uploadHandledImages" wx:if="{{handledImages.length < 9}}">
+            <text>上传图片</text>
+          </button>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="submit-btn" bindtap="submitFeedback">提交反馈</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分配工单弹窗 -->
+  <view wx:if="{{showAssignModal}}" class="assign-modal">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">分配工单</text>
+        <image class="close-icon" src="../../assets/icons/close.png" bindtap="closeAssignModal" />
+      </view>
+      <view class="modal-body">
+        <view class="form-group">
+          <view class="form-label">选择网格员</view>
+          <picker range="{{gridWorkers}}" range-key="username" bindchange="onWorkerChange">
+            <view class="form-picker">
+              <text class="{{selectedWorker ? 'picker-value' : 'picker-placeholder'}}">
+                {{selectedWorker ? selectedWorker.username : '请选择网格员'}}
+              </text>
+              <image class="picker-arrow" src="../../assets/icons/arrow-down.png" />
+            </view>
+          </picker>
+        </view>
+        <view class="form-group">
+          <view class="form-label">截止时间（可选）</view>
+          <picker mode="date" value="{{assignDeadline}}" bindchange="onDeadlineChange">
+            <view class="form-picker">
+              <text class="{{assignDeadline ? 'picker-value' : 'picker-placeholder'}}">
+                {{assignDeadline || '请选择截止时间'}}
+              </text>
+              <image class="picker-arrow" src="../../assets/icons/arrow-down.png" />
+            </view>
+          </picker>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="submit-btn" bindtap="submitAssign">确认分配</button>
+        <button class="cancel-btn" bindtap="closeAssignModal">取消</button>
+      </view>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,46 @@
+<view class="container">
+  <view class="login-box">
+    <view class="title">智慧明发社区</view>
+    
+    <view class="login-type">
+      <view class="type-item {{!isAdminLogin ? 'active' : ''}}" bindtap="switchLoginType">
+        微信登录
+      </view>
+      <view class="type-item {{isAdminLogin ? 'active' : ''}}" bindtap="switchLoginType">
+        管理员登录
+      </view>
+    </view>
+
+    <block wx:if="{{isAdminLogin}}">
+      <view class="input-group">
+        <input 
+          class="input" 
+          placeholder="请输入手机号" 
+          value="{{phoneNumber}}"
+          bindinput="onPhoneNumberInput"
+          type="number"
+          maxlength="11"
+          adjust-position="false"
+        />
+        <input 
+          class="input" 
+          type="password" 
+          placeholder="请输入密码" 
+          value="{{password}}"
+          bindinput="onPasswordInput"
+          adjust-position="false"
+        />
+      </view>
+      <button class="btn-login" bindtap="handleAdminLogin">登录</button>
+    </block>
+
+    <block wx:else>
+      <view class="wx-login">
+        <button class="btn-wx-login" open-type="getUserInfo" bindgetuserinfo="handleWxLogin">
+          <image class="wx-icon" src="/assets/icons/wx-icon.png" />
+          <text>微信一键登录</text>
+        </button>
+      </view>
+    </block>
+  </view>
+</view> 

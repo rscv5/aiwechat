@@ -1,0 +1,26 @@
+.status-tab-scroll {
+  width: 100vw;
+  white-space: nowrap;
+  background: #fff;
+}
+.status-tab-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16rpx;
+}
+.status-tab-item {
+  padding: 20rpx 36rpx;
+  font-size: 28rpx;
+  color: #888;
+  border-radius: 32rpx;
+  margin-right: 16rpx;
+  background: #f7f7f7;
+  transition: all 0.2s;
+}
+.status-tab-item.active {
+  color: #FF9900;
+  background: #FFF7E6;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(255,153,0,0.08);
+} 

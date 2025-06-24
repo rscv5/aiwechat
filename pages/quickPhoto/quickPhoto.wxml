@@ -1,0 +1,123 @@
+<!--pages/quickPhoto/quickPhoto.wxml-->
+<!-- <view class="gradient-bg"></view> -->
+
+<!-- 社区信息 -->
+<community-header communityInfo="{{communityInfo}}" />
+  
+<!-- 主要内容区域 -->
+<view class="content-wrapper">
+  <!-- 拍照上传区域 -->
+  <view class="photo-section">
+    <view class="photo-grid">
+      <block wx:for="{{images}}" wx:key="index">
+        <view class="photo-item">
+          <image src="{{item}}" mode="aspectFill" class="uploaded-photo" bindtap="previewImage" data-index="{{index}}"/>
+          <view class="delete-btn" bindtap="removeImage" data-index="{{index}}">
+            <text class="delete-icon">×</text>
+          </view>
+        </view>
+      </block>
+      <view class="photo-item add-photo" bindtap="takePhoto" wx:if="{{images.length < 3}}">
+        <text class="add-icon">+</text>
+        <text>拍照上传</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 问题描述区域 -->
+  <view class="form-section">
+    <view class="form-item">
+      <textarea 
+        class="textarea" 
+        placeholder="请简要描述问题（5-200字）" 
+        value="{{content}}" 
+        bindinput="onContentInput"
+        maxlength="200"
+      >
+      <view class="word-count">{{content.length}}/200</view>
+      </textarea>
+      
+    </view>
+    
+    <!-- 地址信息 -->
+    <view class="location-section">
+
+      <view class="input-field disabled">
+        <text>{{location || '正在获取位置...'}}</text>
+        <image 
+            class="refresh-icon-btn" 
+            src="/assets/icons/refresh.png" 
+            bindtap="getLocation" 
+            mode="aspectFit"
+        />
+      </view>
+
+    </view>
+    <view class="phone-row">
+        <text>楼    栋   号: </text>
+        <view class="input-field">
+        <input 
+          type="number" 
+          placeholder="请输入具体楼栋号" 
+          value="{{building}}" 
+          bindinput="onBuildingInput"
+          maxlength="10"
+        />
+      </view>
+    </view>
+    <!-- 联系方式 -->
+    <view class="phone-row">
+        <text>回访号码:</text>
+        <view class="input-field">
+            <input 
+            type="number" 
+            placeholder="请输入号码" 
+            value="{{phone}}" 
+            bindinput="onPhoneInput"
+            maxlength="11"
+            />
+        </view>
+    </view>
+    <!-- <view class="input-field">
+      <input 
+        type="number" 
+        placeholder="请输入联系电话" 
+        value="{{phone}}" 
+        bindinput="onPhoneInput"
+        maxlength="11"
+      />
+    </view> -->
+  </view>
+</view>
+
+<!-- 底部提交按钮 -->
+<view class="submit-bar">
+  <view class="submit-tip">提交前请确保信息准确无误</view>
+  <button 
+    class="submit-btn {{!canSubmit ? 'disabled' : ''}}" 
+    loading="{{submitting}}"
+    disabled="{{!canSubmit}}"
+    bindtap="submit"
+  >提交</button>
+</view>
+
+<!-- Toast提示 -->
+<van-toast id="van-toast" />
+
+<!-- 隐私授权弹窗 -->
+<view class="privacy-modal" wx:if="{{showPrivacyPopup}}">
+  <view class="privacy-content">
+    <view class="privacy-title">隐私授权说明</view>
+    <view class="privacy-text">
+      <text>为了更好地为您提供服务，我们需要收集以下信息：</text>
+      <text>1. 地理位置信息：用于定位问题发生地点</text>
+      <text>2. 手机号码：用于与您保持联系</text>
+      <text>3. 楼栋号信息：用于准确定位问题区域</text>
+      <text>\n这些信息将仅用于工单处理，我们会严格保护您的隐私安全。您可以随时联系管理员注销账号，注销后相关数据将被删除。</text>
+    </view>
+    <view class="privacy-buttons">
+      <button class="privacy-btn cancel" bindtap="rejectPrivacy">暂不同意</button>
+      <button class="privacy-btn confirm" bindtap="acceptPrivacy">同意并继续</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,43 @@
+/* pages/index/indexdetail/comparedetail.wxss */
+.container {
+  padding: 20rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.description {
+  font-size: 28rpx;
+  color: #666;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.comparison-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
+}
+
+.image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.comparison-image {
+  width: 100%;
+  height: 400rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}

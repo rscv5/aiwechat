@@ -1,0 +1,27 @@
+<!--pages/index/indexdetail/comparedetail.wxml-->
+<view class="container">
+  <view class="title">{{title}}</view>
+  
+  
+  <view class="comparison-container">
+    <view class="image-section">
+      <image 
+        src="{{beforeImage}}" 
+        mode="aspectFit" 
+        bindtap="previewBeforeImage"
+        class="comparison-image"
+      />
+      <view class="image-label">整改前</view>
+    </view>
+    
+    <view class="image-section">
+      <image 
+        src="{{afterImage}}" 
+        mode="aspectFit" 
+        bindtap="previewAfterImage"
+        class="comparison-image"
+      />
+     <view class="image-label">整改后</view>
+    </view>
+  </view>
+</view>
